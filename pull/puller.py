@@ -9,6 +9,7 @@ class Puller:
     def __init__(self, api_key, local=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
+        self.local = local
 
     def get_tweets(self, username, max_results):
         tweet_data = []
@@ -47,15 +48,16 @@ class Puller:
         max_results = 100
         tweets = self.get_tweets(username, max_results)
 
-        with open('elonmusk_tweets_translated.csv', 'w', newline='', encoding='utf-8') as csvfile:
-            csv_writer = csv.writer(csvfile)
-            csv_writer.writerow(
-                ['Username', 'Tweet URL', 'Tweet Text', 'Translated Text'])
-
-            for tweet_url, tweet_text in tweets:
-                translated_text = self.translate_to_chinese(tweet_text)
+        if self.local:
+            with open('elonmusk_tweets_translated.csv', 'w', newline='', encoding='utf-8') as csvfile:
+                csv_writer = csv.writer(csvfile)
                 csv_writer.writerow(
-                    [username, tweet_url, tweet_text, translated_text])
+                    ['Username', 'Tweet URL', 'Tweet Text', 'Translated Text'])
+
+                for tweet_url, tweet_text in tweets:
+                    translated_text = self.translate_to_chinese(tweet_text)
+                    csv_writer.writerow(
+                        [username, tweet_url, tweet_text, translated_text])
 
         elapsed_time = time.time() - start_time
         print(

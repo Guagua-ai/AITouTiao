@@ -1,12 +1,17 @@
 import csv
 import openai
 
+from chat.result import format_results
+
 
 class Chatbot:
-    def __init__(self, api_key, local=False):
+    def __init__(self, api_key, local=True, html_mode=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
-        self.data = self.read_csv('elonmusk_tweets_translated.csv')
+        self.html_mode = html_mode
+        if local:
+            self.data = self.read_csv('elonmusk_tweets_translated.csv')
+        
 
     # Read the CSV file and store the contents in a list
     def read_csv(self, filename):
@@ -33,7 +38,7 @@ class Chatbot:
         return keywords
 
     # Find relevant results based on user input
-    def find_relevant_results(self, user_input):
+    def find_relevant_results(self, user_input, local_db=None):
         def has_keywords(text, keywords):
             return any(keyword.lower() in text.lower() for keyword in keywords)
 
@@ -51,6 +56,8 @@ class Chatbot:
     def format_results(self, results):
         if not results:
             return "No matching results found."
+        if self.html_mode:
+            return format_results(results, html_mode=True)
         response = "Matching results:\n\n"
         for result in results:
             response += f"Tweet URL: {result[1]}\nTweet Text: {result[2]}\nTranslated Text: {result[3]}\n\n"
