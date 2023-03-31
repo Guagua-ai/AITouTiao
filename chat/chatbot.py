@@ -3,7 +3,8 @@ import openai
 
 
 class Chatbot:
-    def __init__(self, api_key):
+    def __init__(self, api_key, local=False):
+        assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
         self.data = self.read_csv('elonmusk_tweets_translated.csv')
 

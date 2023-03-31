@@ -6,7 +6,8 @@ import urllib.parse
 
 
 class Puller:
-    def __init__(self, api_key):
+    def __init__(self, api_key, local=False):
+        assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
 
     def get_tweets(self, username, max_results):
