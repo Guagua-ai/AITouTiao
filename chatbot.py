@@ -33,13 +33,17 @@ class Chatbot:
 
     # Find relevant results based on user input
     def find_relevant_results(self, user_input):
-        results = []
+        def has_keywords(text, keywords):
+            return any(keyword.lower() in text.lower() for keyword in keywords)
+
         keywords = self.generate_keywords(user_input)
-        print(
-            f"Keywords: {keywords}\n" if keywords else "No keywords found.\n")
-        for row in self.data:
-            if any(keyword.lower() in row[0].lower() for keyword in keywords) or any(keyword.lower() in row[1].lower() for keyword in keywords) or any(keyword.lower() in row[2].lower() for keyword in keywords) or any(keyword.lower() in row[3].lower() for keyword in keywords):
-                results.append(row)
+        print(f"Keywords: {keywords}\n" if keywords else "No keywords found.\n")
+
+        results = [
+            row for row in self.data
+            if any(has_keywords(row[i], keywords) for i in range(len(row)))
+        ]
+
         return results
 
     # Format the results for display
