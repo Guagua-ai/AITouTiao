@@ -575,3 +575,4 @@ cython_debug/
 .idea/*
 
 build/
+myenv/Scripts/python.exe
