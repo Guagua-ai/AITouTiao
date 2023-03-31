@@ -38,10 +38,8 @@ class Chatbot:
         print(
             f"Keywords: {keywords}\n" if keywords else "No keywords found.\n")
         for row in self.data:
-            for r in row:
-                if any(keyword.lower() in r.lower() for keyword in keywords):
-                    results.append(row)
-                    break
+            if any(keyword.lower() in row[0].lower() for keyword in keywords) or any(keyword.lower() in row[1].lower() for keyword in keywords) or any(keyword.lower() in row[2].lower() for keyword in keywords) or any(keyword.lower() in row[3].lower() for keyword in keywords):
+                results.append(row)
         return results
 
     # Format the results for display
