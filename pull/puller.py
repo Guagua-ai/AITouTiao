@@ -1,6 +1,5 @@
 import time
 import snscrape.modules.twitter as sntwitter
-import csv
 import openai
 import urllib.parse
 
@@ -12,21 +11,21 @@ class Puller:
         self.local = local
 
     def get_tweets(self, username, max_results):
-        tweet_data = []
+        tweet_list = []
         for i, tweet in enumerate(sntwitter.TwitterUserScraper(username).get_items()):
             if i >= max_results:
                 break
 
             # Use inReplyToTweetId instead of inReplyToStatusId
-            if not tweet.inReplyToTweetId and '@' not in tweet.rawContent:
+            if not tweet.inReplyToTweetId and '@' not in tweet.content:
                 try:
-                    url = urllib.parse.urlparse(tweet.rawContent)
+                    url = urllib.parse.urlparse(tweet.content)
                     if not (url.scheme and url.netloc):
-                        tweet_data.append((tweet.url, tweet.rawContent))
+                        tweet_list.append(tweet)
                 except ValueError:
-                    tweet_data.append((tweet.url, tweet.rawContent))
+                    tweet_list.append(tweet)
 
-        return tweet_data
+        return tweet_list
 
     def translate_to_chinese(self, text):
         response = openai.Completion.create(
@@ -48,16 +47,27 @@ class Puller:
         max_results = 100
         tweets = self.get_tweets(username, max_results)
 
-        if self.local:
-            with open('elonmusk_tweets_translated.csv', 'w', newline='', encoding='utf-8') as csvfile:
-                csv_writer = csv.writer(csvfile)
-                csv_writer.writerow(
-                    ['Username', 'Tweet URL', 'Tweet Text', 'Translated Text'])
+        formatted_tweets = []
+        for tweet in tweets:
+            formatted_tweet = {
+                'source': {
+                    'id': tweet.user.id,
+                    'name': "Twitter",
+                },
+                'author': tweet.user.username,
+                'title': self.translate_to_chinese(tweet.content),
+                'description': '',  # Description is not available in Tweet object
+                'url': f"https://twitter.com/{tweet.user.username}/status/{tweet.id}",
+                'urlToImage': tweet.user.profileImageUrl,
+                'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'content': self.translate_to_chinese(tweet.content)
+            }
+            formatted_tweets.append(formatted_tweet)
 
-                for tweet_url, tweet_text in tweets:
-                    translated_text = self.translate_to_chinese(tweet_text)
-                    csv_writer.writerow(
-                        [username, tweet_url, tweet_text, translated_text])
+        if self.local:
+            import pandas as pd
+            df = pd.DataFrame(formatted_tweets)
+            df.to_csv('elonmusk_tweets_translated.csv', index=False)
 
         elapsed_time = time.time() - start_time
         print(

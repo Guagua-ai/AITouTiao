@@ -14,4 +14,4 @@ if __name__ == '__main__':
     cli_runner.run()
 
     # Run the Flask app
-    app.run(debug=True)
+    app.run(port=8080, debug=True)

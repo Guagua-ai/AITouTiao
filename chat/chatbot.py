@@ -9,16 +9,15 @@ class Chatbot:
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
         self.html_mode = html_mode
+        self.local = local
         if local:
             self.data = self.read_csv('elonmusk_tweets_translated.csv')
-        
 
     # Read the CSV file and store the contents in a list
     def read_csv(self, filename):
         data = []
         with open(filename, newline='', encoding='utf-8') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            next(csv_reader)  # Skip header row
+            csv_reader = csv.DictReader(csvfile)
             for row in csv_reader:
                 data.append(row)
         return data
@@ -43,11 +42,12 @@ class Chatbot:
             return any(keyword.lower() in text.lower() for keyword in keywords)
 
         keywords = self.generate_keywords(user_input)
-        print(f"Keywords: {keywords}\n" if keywords else "No keywords found.\n")
+        print(
+            f"Keywords: {keywords}\n" if keywords else "No keywords found.\n")
 
         results = [
             row for row in self.data
-            if any(has_keywords(row[i], keywords) for i in range(len(row)))
+            if any(has_keywords(row[key], keywords) for key in row)
         ]
 
         return results
@@ -60,10 +60,28 @@ class Chatbot:
             return format_results(results, html_mode=True)
         response = "Matching results:\n\n"
         for result in results:
-            response += f"Tweet URL: {result[1]}\nTweet Text: {result[2]}\nTranslated Text: {result[3]}\n\n"
+            response += f"Author: {result['author']}\nTweet URL: {result['url']}\nTweet Text: {result['title']}\nTranslated Text: {result['content']}\n\n"
         return response
 
+    # Get the tweet data
+    def get_tweet_data(self):
+        tweet_data = []
+        for row in self.data:
+            tweet_data.append({
+                "source": row['source'],
+                "author": row['author'],
+                "title": row['title'],
+                "description": row['description'],
+                "url": row['url'],
+                "urlToImage": row['urlToImage'],
+                "publishedAt": row['publishedAt'],
+                "content": row['content']
+            })
+
+        return tweet_data
+
     # Main chatbot function
+
     def run(self, user_input):
         relevant_results = self.find_relevant_results(user_input)
         print(f"Found {len(relevant_results)} relevant results.\n")
