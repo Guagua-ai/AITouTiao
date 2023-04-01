@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from chat import chatbot
 from pull import puller
@@ -28,3 +29,6 @@ class CliRunner:
         # Run the puller if the collect argument is passed
         if self.args.collect:
             self.puller.run()
+
+        # Exit the program
+        sys.exit(0)

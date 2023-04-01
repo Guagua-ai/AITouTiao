@@ -11,6 +11,7 @@ class Chatbot:
         openai.api_key = api_key
         self.html_mode = html_mode
         self.local = local
+        self.data = []
 
     # Read the CSV file and store the contents in a list
     def read_csv(self, filename):
@@ -23,17 +24,19 @@ class Chatbot:
 
     # Use GPT-3 to generate keywords from the user input
     def generate_keywords(self, user_input):
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"Extract important keywords from the following text for easy query: '{user_input}'",
-            max_tokens=50,
-            n=1,
-            stop=None,
-            temperature=0.5,
-        )
-
-        keywords = response.choices[0].text.strip().split(', ')
-        return keywords
+        try:
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt=f"Extract important keywords from the following text for easy query: '{user_input}'",
+                max_tokens=50,
+                n=1,
+                stop=None,
+                temperature=0.5,
+            )
+            keywords = response.choices[0].text.strip().split(', ')
+            return keywords
+        except openai.error.RateLimitError:
+            return user_input.split()
 
     # Find relevant results based on user input
     def find_relevant_results(self, user_input):
