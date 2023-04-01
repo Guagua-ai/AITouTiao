@@ -26,6 +26,9 @@ clean:
 	rm -rf __pycache__
 	rm -rf *.egg-info
 
+collect:
+	$(PYTHON) run.py --collect --local
+
 update:
 	$(PIP) freeze > requirements.txt
 
