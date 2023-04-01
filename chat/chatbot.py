@@ -1,5 +1,6 @@
 import csv
 import os
+from config.config import ChatbotConfig
 import openai
 
 from chat.result import format_results
@@ -9,6 +10,7 @@ class Chatbot:
     def __init__(self, api_key, local=True, html_mode=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
+        self.config = ChatbotConfig()
         self.html_mode = html_mode
         self.local = local
         self.data = []
@@ -26,12 +28,12 @@ class Chatbot:
     def generate_keywords(self, user_input):
         try:
             response = openai.Completion.create(
-                engine="text-davinci-003",
+                engine=self.config.translation_engine,
                 prompt=f"Extract important keywords from the following text for easy query: '{user_input}'",
-                max_tokens=50,
-                n=1,
+                max_tokens=self.config.translation_max_tokens,
+                n=self.config.translation_max_num_results,
                 stop=None,
-                temperature=0.5,
+                temperature=self.config.translation_temperature,
             )
             keywords = response.choices[0].text.strip().split(', ')
             return keywords
@@ -83,7 +85,6 @@ class Chatbot:
         return tweet_data
 
     # Main chatbot function
-
     def run(self, user_input):
         assert os.path.exists(
             'ai_tweets_translated.csv'), 'Please run `python pull/puller.py` first'
