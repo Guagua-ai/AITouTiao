@@ -2,6 +2,8 @@ import json
 import time
 import pandas as pd
 from app import app
+import requests
+
 
 
 class TestCollectAPI:

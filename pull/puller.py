@@ -17,9 +17,9 @@ class Puller:
                 break
 
             # Use inReplyToTweetId instead of inReplyToStatusId
-            if not tweet.inReplyToTweetId and '@' not in tweet.content:
+            if not tweet.inReplyToTweetId and '@' not in tweet.rawContent:
                 try:
-                    url = urllib.parse.urlparse(tweet.content)
+                    url = urllib.parse.urlparse(tweet.rawContent)
                     if not (url.scheme and url.netloc):
                         tweet_list.append(tweet)
                 except ValueError:
@@ -49,7 +49,7 @@ class Puller:
 
         formatted_tweets = []
         for tweet in tweets:
-            content = self.translate_to_chinese(tweet.content)
+            content = self.translate_to_chinese(tweet.rawContent)
             title = content
             if len(content) > 20:
                 title = content[:20]
