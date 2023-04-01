@@ -10,7 +10,7 @@ class TestCollectAPI:
     def test_collect_api(self):
         # Define the expected response
         expected_response = {
-            'message': 'Tweets collected and saved to elonmusk_tweets_translated.csv'
+            'message': 'Tweets collected and saved to ai_tweets_translated.csv'
         }
         
         # Send the API request
@@ -27,5 +27,5 @@ class TestCollectAPI:
         assert data == expected_response
         
         # Check that the CSV file was created and contains data
-        df = pd.read_csv('elonmusk_tweets_translated.csv')
+        df = pd.read_csv('ai_tweets_translated.csv')
         assert not df.empty

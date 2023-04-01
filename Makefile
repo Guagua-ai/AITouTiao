@@ -1,7 +1,7 @@
 # Define variables
 APP_NAME=myflaskapp
-PYTHON=python
-PIP=pip
+PYTHON=python3
+PIP=pip3
 
 # Define targets
 all: install run

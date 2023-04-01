@@ -43,39 +43,49 @@ class Puller:
     def run(self):
         start_time = time.time()
 
-        username = 'elonmusk'
-        max_results = 100
-        tweets = self.get_tweets(username, max_results)
+        usernames = ['elonmusk', 'sama']
 
-        formatted_tweets = []
-        for tweet in tweets:
-            content = self.translate_to_chinese(tweet.rawContent)
-            title = content
-            if len(content) > 20:
-                title = content[:20]
-            description = content
-            if len(content) > 40:
-                description = content[:40] + '...'
-            formatted_tweet = {
-                'source': {
-                    'id': tweet.user.id,
-                    'name': "Twitter",
-                },
-                'author': tweet.user.username,
-                'title': title,
-                'description': description,
-                'url': f"https://twitter.com/{tweet.user.username}/status/{tweet.id}",
-                'urlToImage': tweet.user.profileImageUrl,
-                'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'content': content,
-            }
-            formatted_tweets.append(formatted_tweet)
+        # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
+        #                   'goodfellow_ian', 'ylecun', 'karpathy']
+
+        max_results = 100
+        all_tweets = []
+
+        for username in usernames:
+            print(f"Fetching tweets from {username}")
+            tweets = self.get_tweets(username, max_results)
+
+            formatted_tweets = []
+            for tweet in tweets:
+                content = self.translate_to_chinese(tweet.rawContent)
+                title = content
+                if len(content) > 20:
+                    title = content[:20]
+                description = content
+                if len(content) > 40:
+                    description = content[:40] + '...'
+                formatted_tweet = {
+                    'source': {
+                        'id': tweet.user.id,
+                        'name': "Twitter",
+                    },
+                    'author': tweet.user.username,
+                    'title': title,
+                    'description': description,
+                    'url': f"https://twitter.com/{tweet.user.username}/status/{tweet.id}",
+                    'urlToImage': tweet.user.profileImageUrl,
+                    'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'content': content,
+                }
+                formatted_tweets.append(formatted_tweet)
+
+            all_tweets.extend(formatted_tweets)
 
         if self.local:
             import pandas as pd
-            df = pd.DataFrame(formatted_tweets)
-            df.to_csv('elonmusk_tweets_translated.csv', index=False)
+            df = pd.DataFrame(all_tweets)
+            df.to_csv('ai_tweets_translated.csv', index=False)
 
         elapsed_time = time.time() - start_time
         print(
-            f"Saved results to elonmusk_tweets_translated.csv in {elapsed_time:.2f} seconds")
+            f"Saved results to ai_tweets_translated.csv in {elapsed_time:.2f} seconds")

@@ -18,7 +18,7 @@ chatbot = Chatbot(api_key=open_ai_api, local=True)
 @app.route('/collect', methods=['GET'])
 def collect():
     puller.run()
-    return jsonify({'message': 'Tweets collected and saved to elonmusk_tweets_translated.csv'})
+    return jsonify({'message': 'Tweets collected and saved to ai_tweets_translated.csv'})
 
 
 @app.route('/chat', methods=['POST'])
@@ -27,7 +27,7 @@ def chat():
     if not user_input:
         return jsonify({'error': 'User input is required'}), 400
 
-    data = chatbot.read_csv('elonmusk_tweets_translated.csv')
+    data = chatbot.read_csv('ai_tweets_translated.csv')
     relevant_results = chatbot.find_relevant_results(data, user_input)
     response = chatbot.format_results(relevant_results)
 
