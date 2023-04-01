@@ -49,18 +49,25 @@ class Puller:
 
         formatted_tweets = []
         for tweet in tweets:
+            content = self.translate_to_chinese(tweet.content)
+            title = content
+            if len(content) > 20:
+                title = content[:20]
+            description = content
+            if len(content) > 40:
+                description = content[:40] + '...'
             formatted_tweet = {
                 'source': {
                     'id': tweet.user.id,
                     'name': "Twitter",
                 },
                 'author': tweet.user.username,
-                'title': self.translate_to_chinese(tweet.content),
-                'description': '',  # Description is not available in Tweet object
+                'title': title,
+                'description': description,
                 'url': f"https://twitter.com/{tweet.user.username}/status/{tweet.id}",
                 'urlToImage': tweet.user.profileImageUrl,
                 'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'content': self.translate_to_chinese(tweet.content)
+                'content': content,
             }
             formatted_tweets.append(formatted_tweet)
 
