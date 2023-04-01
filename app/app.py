@@ -7,7 +7,6 @@ from pull.puller import Puller
 
 
 load_dotenv('.env')
-print(os.getenv('OPENAI_API_KEY'))
 
 app = Flask(__name__)
 CORS(app)
