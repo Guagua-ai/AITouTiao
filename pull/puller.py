@@ -30,11 +30,11 @@ class Puller:
     def translate_to_chinese(self, text):
         response = openai.Completion.create(
             engine="text-davinci-003",
-            prompt=f"Translate the following English text to Chinese: '{text}'",
+            prompt=f"Translate the following English text to Simplified Chinese: '{text}'",
             max_tokens=300,
             n=1,
             stop=None,
-            temperature=0.8,
+            temperature=0.4,
         )
 
         translation = response.choices[0].text.strip()
