@@ -20,11 +20,13 @@ class Chatbot:
         data = []
         with open(filename, newline='', encoding='utf-8') as csvfile:
             csv_reader = csv.DictReader(csvfile)
-            for row in csv_reader:
+            for i, row in enumerate(csv_reader):
+                row['id'] = i + 1
                 data.append(row)
         return data
 
     # Use GPT-3 to generate keywords from the user input
+
     def generate_keywords(self, user_input):
         try:
             response = openai.Completion.create(
@@ -96,6 +98,7 @@ class Chatbot:
         tweet_data = []
         for row in self.data:
             tweet_data.append({
+                "id": row['id'],
                 "source": row['source'],
                 "author": row['author'],
                 "title": row['title'],
