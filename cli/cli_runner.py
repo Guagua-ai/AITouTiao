@@ -31,3 +31,7 @@ class CliRunner:
         # Run the puller if the collect argument is passed
         if self.args.collect:
             self.puller.run()
+
+        # If no arguments are passed, print the help message
+        if self.args.chat is not None and self.args.collect is not None:
+            sys.exit()
