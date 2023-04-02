@@ -32,4 +32,4 @@ collect:
 update:
 	$(PIP) freeze > requirements.txt
 
-.PHONY: all install run test clean update
+.PHONY: all install run test clean update collect

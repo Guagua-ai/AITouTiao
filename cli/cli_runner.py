@@ -15,6 +15,8 @@ class CliRunner:
             '--chat', type=str, help='Execute chatbot function with a user input string')
         self.parser.add_argument(
             '--local', action='store_true', default=False, help='Execute tweets pull function by storing data locally')
+        self.parser.add_argument(
+            '--keyword', action='store_true', default=False, help='Wheteher to use keyword from OpenAI to search or not')
         self.args = self.parser.parse_args()
 
         # Initialize chatbot and puller
@@ -24,7 +26,7 @@ class CliRunner:
     def run(self):
         # Run the chatbot or puller based on the arguments
         if self.args.chat:
-            self.chatbot.run(self.args.chat)
+            self.chatbot.run(self.args.chat, self.args.keyword)
 
         # Run the puller if the collect argument is passed
         if self.args.collect:

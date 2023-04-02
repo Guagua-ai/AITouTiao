@@ -41,11 +41,14 @@ class Chatbot:
             return user_input.split()
 
     # Find relevant results based on user input
-    def find_relevant_results(self, user_input):
+    def find_relevant_results(self, user_input, use_keyword=False):
         def has_keywords(text, keywords):
             return any(keyword.lower() in text.lower() for keyword in keywords)
 
-        keywords = self.generate_keywords(user_input)
+        keywords = user_input.split()
+        if use_keyword:
+            keywords = self.generate_keywords(user_input)
+
         print(
             f"Keywords: {keywords}\n" if keywords else "No keywords found.\n")
 
@@ -85,12 +88,12 @@ class Chatbot:
         return tweet_data
 
     # Main chatbot function
-    def run(self, user_input):
+    def run(self, user_input, use_keyword=False):
         assert os.path.exists(
             'ai_tweets_translated.csv'), 'Please run `python pull/puller.py` first'
         if self.local:
             self.data = self.read_csv('ai_tweets_translated.csv')
-        relevant_results = self.find_relevant_results(user_input)
+        relevant_results = self.find_relevant_results(user_input, use_keyword)
         print(f"Found {len(relevant_results)} relevant results.\n")
         response = self.format_results(relevant_results)
         print(response)
