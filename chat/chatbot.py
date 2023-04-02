@@ -40,6 +40,18 @@ class Chatbot:
         except openai.error.RateLimitError:
             return user_input.split()
 
+    # Count the number of records
+    def count_total_records(self):
+        if self.local:
+            file_path = 'ai_tweets_translated.csv'
+            if os.path.isfile(file_path):
+                with open(file_path, 'r') as f:
+                    reader = csv.reader(f)
+                    num_lines = sum(1 for row in reader)
+            return num_lines
+        else:
+            return len(self.data)
+
     # Find relevant results based on user input
     def find_relevant_results(self, user_input, use_keyword=False):
         def has_keywords(text, keywords):

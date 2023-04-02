@@ -45,3 +45,9 @@ def tweets():
     }
 
     return jsonify(response_packet)
+
+
+@app.route('/count', methods=['GET'])
+def count_total_records():
+    relevant_results = chatbot.count_total_records()
+    return jsonify({'count': relevant_results})
