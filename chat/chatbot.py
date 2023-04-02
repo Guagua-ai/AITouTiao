@@ -84,6 +84,15 @@ class Chatbot:
 
     # Get the tweet data
     def get_tweet_data(self):
+        if self.data is None and not os.path.exists('ai_tweets_translated.csv'):
+            print(
+                "ai_tweets_translated.csv not found. Please run `python pull/puller.py` first")
+            return []
+
+        if self.data == []:
+            print("Loading ai_tweets_translated.csv...")
+            self.data = self.read_csv('ai_tweets_translated.csv')
+
         tweet_data = []
         for row in self.data:
             tweet_data.append({
