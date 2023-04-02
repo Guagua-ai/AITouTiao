@@ -104,7 +104,6 @@ python-lsp-jsonrpc==1.0.0
 python-lsp-server==1.7.1
 pytoolconfig==1.2.5
 pytz==2022.7.1
-pywatchman==1.4.1
 PyYAML==6.0
 pyzmq==25.0.2
 qtconsole==5.4.1
