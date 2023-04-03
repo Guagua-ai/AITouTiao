@@ -33,7 +33,7 @@ class Chatbot:
                 engine=self.config.translation_engine,
                 prompt=f"Extract important keywords from the following text for easy query: '{user_input}'",
                 max_tokens=self.config.translation_max_tokens,
-                n=self.config.translation_max_num_results,
+                n=self.config.translation_n,
                 stop=None,
                 temperature=self.config.translation_temperature,
             )
