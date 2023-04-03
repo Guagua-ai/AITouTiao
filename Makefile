@@ -13,7 +13,7 @@ run:
 	$(PYTHON) run.py
 
 prod:
-	gunicorn app:app -b 0.0.0.0:8080
+	gunicorn app:app -b 0.0.0.0:8080 --timeout 300
 
 test:
 	$(PYTHON) -m pytest tests/
