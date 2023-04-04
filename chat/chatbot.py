@@ -111,7 +111,7 @@ class Chatbot:
 
     # Get the tweet data
     def get_tweet_data(self):
-        if self.data is None and not os.path.exists('ai_tweets_translated.csv'):
+        if self.local and self.data is None and not os.path.exists('ai_tweets_translated.csv'):
             print(
                 "ai_tweets_translated.csv not found. Please run `python pull/puller.py` first")
             return []
@@ -125,17 +125,33 @@ class Chatbot:
 
         tweet_data = []
         for row in self.data:
-            tweet_data.append({
-                "id": row['id'],
-                "source": row['source'],
-                "author": row['author'],
-                "title": row['title'],
-                "description": row['description'],
-                "url": row['url'],
-                "urlToImage": row['urlToImage'],
-                "publishedAt": row['publishedAt'],
-                "content": row['content']
-            })
+            if self.local:
+                tweet_data.append({
+                    "id": row['id'],
+                    "source": row['source'],
+                    "author": row['author'],
+                    "title": row['title'],
+                    "description": row['description'],
+                    "url": row['url'],
+                    "urlToImage": row['urlToImage'],
+                    "publishedAt": row['publishedAt'],
+                    "content": row['content']
+                })
+            else:
+                tweet_data.append({
+                    "id": row.id,
+                    "source": {
+                        'id': row.source_id,
+                        'name': row.source_name
+                    },
+                    "author": row.author,
+                    "title": row.title,
+                    "description": row.description,
+                    "url": row.url,
+                    "urlToImage": row.url_to_image,
+                    "publishedAt": row.published_at,
+                    "content": row.content
+                })
 
         return tweet_data
 
@@ -147,3 +163,5 @@ class Chatbot:
         print(f"Found {len(relevant_results)} relevant results.\n")
         response = self.format_results(relevant_results)
         print(response)
+        if not self.local:
+            self.session.close()

@@ -1,13 +1,9 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import declarative_base, sessionmaker
-from db import get_connection
-
-# Base class for all models
-Base = declarative_base()
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
+from app import db
 
 
-class Tweet(Base):
+class Tweet(db.Model):
     __tablename__ = 'tweets'
 
     id = Column(Integer, primary_key=True)
@@ -27,3 +23,8 @@ class Tweet(Base):
 
     def __repr__(self):
         return f"<Tweet(id={self.id}, author={self.author}, title={self.title}, url={self.url})>"
+
+
+class TweetSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Tweet

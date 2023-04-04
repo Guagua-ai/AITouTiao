@@ -1,7 +1,8 @@
 from app import app
 from urllib import request
-from auth.auth import User
 from flask import request, jsonify
+from db.conn import get_connection
+from models.user import User
 from modules.utlis import token_required
 
 
@@ -12,16 +13,19 @@ def signup():
     Expects a JSON request with 'email' and 'password' fields.
     """
     data = request.json
+    if not data:
+        return jsonify({'message': 'Request body is empty'}), 400
+    name = data.get('name')
     email = data.get('email')
     password = data.get('password')
     if not email or not password:
         return jsonify({'message': 'Email and password are required'}), 400
-    if User.query.filter_by(email=email).first():
-        return jsonify({'message': 'User already exists'}), 409
-    user = User(email=email)
+
+    user = User(name=name, email=email)
     user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
+    db = get_connection()
+    db.add(user)
+    db.commit()
     return jsonify({'message': 'User created successfully'}), 201
 
 
@@ -50,7 +54,9 @@ def logout():
     """
     current_user = User.query.filter_by(id=g.user_id).first()
     current_user.revoked_token = True
-    db.session.commit()
+
+    db = get_connection()
+    db.commit()
     return jsonify({'message': 'User logged out successfully'}), 200
 
 
