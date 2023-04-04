@@ -1,6 +1,5 @@
-from app import app
-from pull import puller
-from flask import request, jsonify
+from app import app, puller
+from flask import jsonify
 
 
 @app.route('/collect', methods=['GET'])

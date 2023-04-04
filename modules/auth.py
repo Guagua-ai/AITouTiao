@@ -2,6 +2,7 @@ from app import app
 from urllib import request
 from auth.auth import User
 from flask import request, jsonify
+from modules.utlis import token_required
 
 
 @app.route('/signup', methods=['POST'])

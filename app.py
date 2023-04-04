@@ -1,11 +1,10 @@
-import modules
 from functools import wraps
 import os
 from auth.auth import User
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_cors import CORS
-from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin
+from flask_login import LoginManager
 from chat.chatbot import Chatbot
 from pull.puller import Puller
 
@@ -24,3 +23,4 @@ login_manager.init_app(app)
 
 
 # Import the __init__.py from modules which had imported all files from the folder.
+import modules
