@@ -21,6 +21,5 @@ chatbot = Chatbot(api_key=open_ai_api, local=True)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-
 # Import the __init__.py from modules which had imported all files from the folder.
 import modules

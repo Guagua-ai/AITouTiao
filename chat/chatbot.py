@@ -1,12 +1,13 @@
 import csv
 import os
-from config.config import ChatbotConfig
 import openai
-
+from config.config import ChatbotConfig
 from chat.result import format_results
 
 
 class Chatbot:
+    '''Chatbot class to handle all chatbot related functions'''
+
     def __init__(self, api_key, local=True, html_mode=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
@@ -26,7 +27,6 @@ class Chatbot:
         return data
 
     # Use GPT-3 to generate keywords from the user input
-
     def generate_keywords(self, user_input):
         try:
             response = openai.Completion.create(

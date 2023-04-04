@@ -5,11 +5,13 @@ import urllib.parse
 
 
 class Puller:
+    ''' Puller class '''
     def __init__(self, api_key, local=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
         self.local = local
 
+    # get tweets from a user
     def get_tweets(self, username, max_results):
         tweet_list = []
         for i, tweet in enumerate(sntwitter.TwitterUserScraper(username).get_items()):
@@ -27,6 +29,7 @@ class Puller:
 
         return tweet_list
 
+    # translate text to chinese
     def translate_to_chinese(self, text):
         response = openai.Completion.create(
             engine="text-davinci-003",
@@ -40,10 +43,11 @@ class Puller:
         translation = response.choices[0].text.strip()
         return translation
 
+    # run the puller
     def run(self):
         start_time = time.time()
 
-        usernames = ['elonmusk', 'sama']
+        usernames = []
 
         # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
         #                   'goodfellow_ian', 'ylecun', 'karpathy']

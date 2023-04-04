@@ -143,3 +143,5 @@ widgetsnbextension==4.0.7
 wrapt==1.15.0
 yapf==0.32.0
 yarl==1.8.2
+redis==4.5.4
+rq==1.13.0

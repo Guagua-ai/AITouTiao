@@ -576,3 +576,4 @@ cython_debug/
 
 build/
 myenv/Scripts/python.exe
+*.rdb
