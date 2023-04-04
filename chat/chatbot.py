@@ -3,6 +3,8 @@ import os
 import openai
 from config.config import ChatbotConfig
 from chat.result import format_results
+from db import get_connection
+from models.tweet import Tweet
 
 
 class Chatbot:
@@ -14,7 +16,10 @@ class Chatbot:
         self.config = ChatbotConfig()
         self.html_mode = html_mode
         self.local = local
-        self.data = []
+        if local:
+            self.data = self.read_csv('ai_tweets_translated.csv')
+        else:
+            self.session = get_connection()
 
     # Read the CSV file and store the contents in a list
     def read_csv(self, filename):
@@ -66,10 +71,16 @@ class Chatbot:
         print(
             f"Keywords: {keywords}\n" if keywords else "No keywords found.\n")
 
-        results = [
-            row for row in self.data
-            if any(has_keywords(row[key], keywords) for key in row)
-        ]
+        if self.local:
+            results = [
+                row for row in self.data
+                if any(has_keywords(row[key], keywords) for key in row)
+            ]
+        else:
+            session = get_connection()
+            results = session.query(Tweet).filter(
+                Tweet.content.ilike(f'%{"%".join(keywords)}%')).order_by(Tweet.publishedAt.desc()).all()
+            session.close()
 
         return results
 
@@ -84,6 +95,20 @@ class Chatbot:
             response += f"Author: {result['author']}\nTweet URL: {result['url']}\nTweet Text: {result['title']}\nTranslated Text: {result['content']}\n\n"
         return response
 
+    # Fetch the local CSV file
+    def fetch_local_csv(self):
+        assert os.path.exists(
+            'ai_tweets_translated.csv'), 'Please run `python pull/puller.py` first'
+        if self.data == []:
+            self.read_csv('ai_tweets_translated.csv')
+            self.data = sorted(
+                self.data, key=lambda x: x['publishedAt'], reverse=True)
+
+    # Fetch the tweets from the database
+    def fetch_tweets_from_db(self):
+        data = self.session.query(Tweet).all()
+        return data
+
     # Get the tweet data
     def get_tweet_data(self):
         if self.data is None and not os.path.exists('ai_tweets_translated.csv'):
@@ -91,9 +116,12 @@ class Chatbot:
                 "ai_tweets_translated.csv not found. Please run `python pull/puller.py` first")
             return []
 
-        if self.data == []:
-            print("Loading ai_tweets_translated.csv...")
-            self.data = self.read_csv('ai_tweets_translated.csv')
+        if self.local:
+            if self.data == []:
+                print("Loading ai_tweets_translated.csv...")
+                self.data = self.read_csv('ai_tweets_translated.csv')
+        else:
+            self.data = self.fetch_tweets_from_db()
 
         tweet_data = []
         for row in self.data:
@@ -113,10 +141,8 @@ class Chatbot:
 
     # Main chatbot function
     def run(self, user_input, use_keyword=False):
-        assert os.path.exists(
-            'ai_tweets_translated.csv'), 'Please run `python pull/puller.py` first'
         if self.local:
-            self.data = self.read_csv('ai_tweets_translated.csv')
+            self.fetch_local_csv()
         relevant_results = self.find_relevant_results(user_input, use_keyword)
         print(f"Found {len(relevant_results)} relevant results.\n")
         response = self.format_results(relevant_results)

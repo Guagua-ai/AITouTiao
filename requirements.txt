@@ -145,3 +145,6 @@ yapf==0.32.0
 yarl==1.8.2
 redis==4.5.4
 rq==1.13.0
+psycopg2==2.9.6
+sqlalchemy==2.0.8
+psycopg2-binary==2.9.6

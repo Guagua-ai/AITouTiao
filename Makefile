@@ -18,9 +18,6 @@ prod:
 test:
 	$(PYTHON) -m pytest tests/
 
-collect:
-	$(PYTHON) run.py --collect
-
 clean:
 	rm -f *.pyc
 	rm -rf __pycache__

@@ -5,7 +5,7 @@ from jobqueue import q
 @app.route('/collect', methods=['GET'])
 def collect():
     puller.run()
-    return jsonify({'message': 'Tweets collected and saved to ai_tweets_translated.csv'})
+    return jsonify({'message': 'Tweets collected'})
 
 
 @app.route('/collect_async', methods=['GET'])

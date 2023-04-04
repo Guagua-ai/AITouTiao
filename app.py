@@ -15,8 +15,8 @@ app = Flask(__name__)
 CORS(app)
 
 open_ai_api = os.getenv('OPENAI_API_KEY')
-puller = Puller(api_key=open_ai_api, local=True)
-chatbot = Chatbot(api_key=open_ai_api, local=True)
+puller = Puller(api_key=open_ai_api, local=False)
+chatbot = Chatbot(api_key=open_ai_api, local=False)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
