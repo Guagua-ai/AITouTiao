@@ -1,7 +1,6 @@
 import os
 from app import app
 from cli import CliRunner
-from dotenv import load_dotenv
 
 
 if __name__ == '__main__':
