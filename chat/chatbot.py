@@ -18,8 +18,6 @@ class Chatbot:
         self.local = local
         if local:
             self.data = self.read_csv('ai_tweets_translated.csv')
-        else:
-            self.session = get_connection()
 
     # Read the CSV file and store the contents in a list
     def read_csv(self, filename):
@@ -57,7 +55,7 @@ class Chatbot:
                     num_lines = sum(1 for row in reader)
             return num_lines
         else:
-            return len(self.data)
+            return Tweet.count_tweets()
 
     # Find relevant results based on user input
     def find_relevant_results(self, user_input, use_keyword=False):
@@ -104,11 +102,6 @@ class Chatbot:
             self.data = sorted(
                 self.data, key=lambda x: x['publishedAt'], reverse=True)
 
-    # Fetch the tweets from the database
-    def fetch_tweets_from_db(self):
-        data = self.session.query(Tweet).all()
-        return data
-
     # Get the tweet data
     def get_tweet_data(self):
         if self.local and self.data is None and not os.path.exists('ai_tweets_translated.csv'):
@@ -121,7 +114,7 @@ class Chatbot:
                 print("Loading ai_tweets_translated.csv...")
                 self.data = self.read_csv('ai_tweets_translated.csv')
         else:
-            self.data = self.fetch_tweets_from_db()
+            self.data = Tweet.get_all_tweets()
 
         tweet_data = []
         for row in self.data:
@@ -163,5 +156,3 @@ class Chatbot:
         print(f"Found {len(relevant_results)} relevant results.\n")
         response = self.format_results(relevant_results)
         print(response)
-        if not self.local:
-            self.session.close()

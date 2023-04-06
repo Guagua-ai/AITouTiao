@@ -1,5 +1,4 @@
-from app import app
-from chat import chatbot
+from app import app, chatbot
 from flask import request, jsonify
 
 

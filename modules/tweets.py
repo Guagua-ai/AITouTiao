@@ -19,7 +19,6 @@ def tweets():
 
 
 @app.route('/tweets/pagination', methods=['GET'])
-@token_required
 def tweets_pagination():
     since_id = request.args.get('since_id', default=None, type=int)
     per_page = request.args.get('per_page', default=10, type=int)

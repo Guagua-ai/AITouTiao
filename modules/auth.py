@@ -1,3 +1,5 @@
+import models
+
 from app import app
 from urllib import request
 from flask import request, jsonify
