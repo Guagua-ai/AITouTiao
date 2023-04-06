@@ -156,3 +156,4 @@ starkbank-ecdsa==2.2.0
 flask_migrate==4.0.4
 alembic==1.10.2
 Flask-Login==0.6.2
+marshmallow-sqlalchemy==0.29.0
