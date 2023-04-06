@@ -44,8 +44,15 @@ class Tweet(db.Model):
         return Tweet.query.count()
 
     def add_tweet(source_id, source_name, author, title, description, url, url_to_image, published_at, content):
-        new_tweet = Tweet(source_id=source_id, source_name=source_name, author=author, title=title,
-                          description=description, url=url, url_to_image=url_to_image, published_at=published_at, content=content)
+        new_tweet = Tweet(source_id=source_id, 
+                          source_name=source_name, 
+                          author=author, 
+                          title=title,
+                          description=description, 
+                          url=url, 
+                          url_to_image=url_to_image, 
+                          published_at=published_at, 
+                          content=content)
         db.session.add(new_tweet)
         db.session.commit()
 

@@ -2,7 +2,6 @@ from functools import wraps
 from urllib import request
 from app import app, chatbot
 from flask import request, jsonify
-from modules.utlis import token_required
 
 
 @app.route('/tweets', methods=['GET'])

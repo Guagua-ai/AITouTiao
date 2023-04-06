@@ -148,3 +148,12 @@ rq==1.13.0
 psycopg2==2.9.6
 sqlalchemy==2.0.8
 psycopg2-binary==2.9.6
+Flask-JWT-Extended==4.4.4
+PyJWT==2.6.0
+Flask-SQLAlchemy==3.0.3
+Flask-Redis==0.4.0
+python-http-client==3.3.7
+sendgrid==6.10.0
+starkbank-ecdsa==2.2.0
+flask_migrate==4.0.4
+alembic==1.10.2

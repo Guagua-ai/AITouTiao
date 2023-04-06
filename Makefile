@@ -29,4 +29,7 @@ collect:
 update:
 	$(PIP) freeze > requirements.txt
 
-.PHONY: all install run test clean update collect
+migrate:
+	alembic upgrade head
+
+.PHONY: all install run test clean update collect migrate

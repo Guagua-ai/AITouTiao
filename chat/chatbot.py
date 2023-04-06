@@ -148,6 +148,15 @@ class Chatbot:
 
         return tweet_data
 
+    # Main chatbot function with response
+    def run_with_response(self, user_input, use_keyword=False):
+        if self.local:
+            self.fetch_local_csv()
+        relevant_results = self.find_relevant_results(user_input, use_keyword)
+        print(f"Found {len(relevant_results)} relevant results.\n")
+        response = self.format_results(relevant_results)
+        return response
+
     # Main chatbot function
     def run(self, user_input, use_keyword=False):
         if self.local:
