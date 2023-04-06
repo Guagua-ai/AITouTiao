@@ -6,6 +6,7 @@ from pull import puller
 
 
 class CliRunner:
+    ''' CLI runner class '''
     def __init__(self, api_key):
         # Initialize arguments parser
         self.parser = argparse.ArgumentParser()
