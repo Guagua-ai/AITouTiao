@@ -1,15 +1,23 @@
 import time
-import snscrape.modules.twitter as sntwitter
 import openai
 import urllib.parse
+from config.config import TweetConfig
+from db.conn import get_connection
+from models.tweet import Tweet
+from sqlalchemy.exc import IntegrityError
+import snscrape.modules.twitter as sntwitter
 
 
 class Puller:
+    ''' Puller class '''
+
     def __init__(self, api_key, local=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
+        self.config = TweetConfig()
         self.local = local
 
+    # get tweets from a user
     def get_tweets(self, username, max_results):
         tweet_list = []
         for i, tweet in enumerate(sntwitter.TwitterUserScraper(username).get_items()):
@@ -27,6 +35,7 @@ class Puller:
 
         return tweet_list
 
+    # translate text to chinese
     def translate_to_chinese(self, text):
         response = openai.Completion.create(
             engine="text-davinci-003",
@@ -40,20 +49,11 @@ class Puller:
         translation = response.choices[0].text.strip()
         return translation
 
-    def run(self):
-        start_time = time.time()
-
-        usernames = ['elonmusk', 'sama']
-
-        # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
-        #                   'goodfellow_ian', 'ylecun', 'karpathy']
-
-        max_results = 100
-        all_tweets = []
-
+    # retrieve tweets of users
+    def retrieveTweetsOfUsers(self, usernames, all_tweets):
         for username in usernames:
             print(f"Fetching tweets from {username}")
-            tweets = self.get_tweets(username, max_results)
+            tweets = self.get_tweets(username, self.config.max_results)
 
             formatted_tweets = []
             for tweet in tweets:
@@ -78,14 +78,50 @@ class Puller:
                     'content': content,
                 }
                 formatted_tweets.append(formatted_tweet)
-
             all_tweets.extend(formatted_tweets)
+        return formatted_tweets
+
+    # run the puller
+    def run(self):
+        start_time = time.time()
+
+        usernames = ['elonmusk']
+
+        # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
+        #                   'goodfellow_ian', 'ylecun', 'karpathy']
+
+        all_tweets = []
+        formatted_tweets = self.retrieveTweetsOfUsers(usernames, all_tweets)
 
         if self.local:
             import pandas as pd
-            df = pd.DataFrame(all_tweets)
+            df = pd.DataFrame(formatted_tweets)
             df.to_csv('ai_tweets_translated.csv', index=False)
+        else:
+            session = get_connection()
+            for tweet in formatted_tweets:
+                new_tweet = Tweet(
+                    source_id=tweet['source']['id'],
+                    source_name=tweet['source']['name'],
+                    author=tweet['author'],
+                    title=tweet['title'],
+                    description=tweet['description'],
+                    url=tweet['url'],
+                    url_to_image=tweet['urlToImage'],
+                    published_at=tweet['publishedAt'],
+                    content=tweet['content'],
+                )
+                session.add(new_tweet)
+                try:
+                    session.commit()
+                except IntegrityError:
+                    session.rollback()
+                    print(f"Duplicate URL found: {tweet['url']}")
+            session.close()
 
         elapsed_time = time.time() - start_time
-        print(
-            f"Saved results to ai_tweets_translated.csv in {elapsed_time:.2f} seconds")
+        if self.local:
+            print(
+                f"Saved results to ai_tweets_translated.csv in {elapsed_time:.2f} seconds")
+        else:
+            print(f"Saved results to database in {elapsed_time:.2f} seconds")

@@ -13,13 +13,10 @@ run:
 	$(PYTHON) run.py
 
 prod:
-	gunicorn app:app -b 0.0.0.0:8080 --timeout 300
+	gunicorn app:app
 
 test:
 	$(PYTHON) -m pytest tests/
-
-collect:
-	$(PYTHON) run.py --collect
 
 clean:
 	rm -f *.pyc
@@ -32,4 +29,7 @@ collect:
 update:
 	$(PIP) freeze > requirements.txt
 
-.PHONY: all install run test clean update collect
+migrate:
+	alembic upgrade head
+
+.PHONY: all install run test clean update collect migrate
