@@ -13,6 +13,13 @@ def check_if_token_in_denylist(jwt_header, jwt_payload):
     return entry is not None
 
 
+# Decorator to check if the user is admin
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    return User.query.get(identity)
+
+
 # Decorator to check if the user is valid
 def require_valid_user(f):
     @wraps(f)
