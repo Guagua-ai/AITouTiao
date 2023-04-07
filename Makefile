@@ -13,7 +13,7 @@ run:
 	$(PYTHON) run.py
 
 prod:
-	gunicorn --timeout 300 --bind 0.0.0.0:8080 'run:create_app()' --workers 4
+	gunicorn --timeout 300 --bind 0.0.0.0:8080 'run:create_app()'
 
 test:
 	$(PYTHON) -m pytest tests/
