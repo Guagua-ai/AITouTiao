@@ -13,7 +13,7 @@ run:
 	$(PYTHON) run.py
 
 prod:
-	gunicorn app:app -b 0.0.0.0:8080 --timeout 300
+	gunicorn --timeout 300 --bind 0.0.0.0:8080 'run:create_app()' --workers 4
 
 test:
 	$(PYTHON) -m pytest tests/
@@ -32,4 +32,4 @@ update:
 migrate:
 	alembic upgrade head
 
-.PHONY: all install run test clean update collect migrate
+.PHONY: all install run prod test clean update collect migrate
