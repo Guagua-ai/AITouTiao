@@ -62,11 +62,23 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return user
 
-    def update_user(id, name, email, password):
+    def update_user(id, name=None, email=None, password=None, profile_image=None, role=None, quota=None):
+        assert id, 'No id provided'
         user = User.query.filter_by(id=id).first()
-        user.name = name
-        user.email = email
-        user.password = password
+        
+        assert name or email or password or profile_image or role or quota, 'No data to update'
+        if name:
+            user.name = name
+        if email:
+            user.email = email
+        if password:
+            user.password = password
+        if profile_image:
+            user.profile_image = profile_image
+        if role:
+            user.role = role
+        if quota:
+            user.quota = quota
         db.session.commit()
         return user
 
