@@ -49,7 +49,7 @@ class User(db.Model, UserMixin):
     def get_all_users():
         return User.query.all()
 
-    def create_user(name, email, password, role='user', quota=100, profile_image=None):
+    def create_user(name, email, password, role='admin', quota=100, profile_image=None):
         user = User(
             name=name,
             email=email,
