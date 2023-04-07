@@ -57,6 +57,10 @@ class Puller:
 
             formatted_tweets = []
             for tweet in tweets:
+                url = f"https://twitter.com/{tweet.user.username}/status/{tweet.id}"
+                # check if tweet already exists
+                if Tweet.get_tweet_by_url(url):
+                    continue
                 content = self.translate_to_chinese(tweet.rawContent)
                 title = content
                 if len(content) > 20:
@@ -72,7 +76,7 @@ class Puller:
                     'author': tweet.user.username,
                     'title': title,
                     'description': description,
-                    'url': f"https://twitter.com/{tweet.user.username}/status/{tweet.id}",
+                    'url': url,
                     'urlToImage': tweet.user.profileImageUrl,
                     'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                     'content': content,
@@ -85,7 +89,7 @@ class Puller:
     def run(self):
         start_time = time.time()
 
-        usernames = ['elonmusk']
+        usernames = ['elonmusk', 'sama', 'ylecun']
 
         # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
         #                   'goodfellow_ian', 'ylecun', 'karpathy']
