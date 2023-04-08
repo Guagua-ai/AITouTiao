@@ -1,9 +1,9 @@
 import time
 import openai
 import urllib.parse
+from models.tweet import Tweet
 from config.config import TweetConfig
 from db.conn import get_connection
-from models.tweet import Tweet
 from sqlalchemy.exc import IntegrityError
 import snscrape.modules.twitter as sntwitter
 
@@ -59,7 +59,7 @@ class Puller:
             for tweet in tweets:
                 url = f"https://twitter.com/{tweet.user.username}/status/{tweet.id}"
                 # check if tweet already exists
-                if Tweet.query.filter_by(url=url).first():
+                if Tweet.get_tweet_by_url(url):
                     continue
                 content = self.translate_to_chinese(tweet.rawContent)
                 title = content
