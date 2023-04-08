@@ -59,7 +59,7 @@ class Puller:
             for tweet in tweets:
                 url = f"https://twitter.com/{tweet.user.username}/status/{tweet.id}"
                 # check if tweet already exists
-                if Tweet.get_tweet_by_url(url):
+                if Tweet.query.filter_by(url=url).first():
                     continue
                 content = self.translate_to_chinese(tweet.rawContent)
                 title = content

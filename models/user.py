@@ -49,7 +49,7 @@ class User(db.Model, UserMixin):
     def get_all_users():
         return User.query.all()
 
-    def create_user(name, email, password, role='admin', quota=100, profile_image=None):
+    def create_user(name, email, password, role='user', quota=100, profile_image=None):
         user = User(
             name=name,
             email=email,
@@ -65,7 +65,7 @@ class User(db.Model, UserMixin):
     def update_user(id, name=None, email=None, password=None, profile_image=None, role=None, quota=None):
         assert id, 'No id provided'
         user = User.query.filter_by(id=id).first()
-        
+
         assert name or email or password or profile_image or role or quota, 'No data to update'
         if name:
             user.name = name

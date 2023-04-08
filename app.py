@@ -46,7 +46,7 @@ open_ai_api = os.getenv('OPENAI_API_KEY')
 enable_local_mode = os.getenv("LOCAL_MODE", "False") == "True"
 
 # Create the queue
-q = NewsQueue(os.getenv('REDIS_URL'))
+q = NewsQueue(connection=os.getenv('REDIS_URL'))
 
 # Configure SendGrid
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
