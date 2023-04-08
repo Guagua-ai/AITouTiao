@@ -2,11 +2,19 @@
 import os
 import importlib
 
-# Get all files.
-views = [f for f in os.listdir(os.path.dirname(os.path.abspath(
-    __file__))) if f.endswith(".py") and f != "__init__.py"]
+# Get the current directory.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get all files in the current directory.
+views = [f for f in os.listdir(current_dir) if f.endswith(".py") and f != "__init__.py"]
 
 # Import all files from modules folder.
 for view in views:
-    importlib.import_module(os.path.dirname(
-        os.path.realpath(__file__)).split('/')[-1] + "." + view[:-3])
+    # Get the parent folder name.
+    parent_folder = os.path.split(current_dir)[-1]
+
+    # Create the module name by removing the '.py' extension from the file name.
+    module_name = view[:-3]
+
+    # Import the module using the parent folder and module name.
+    importlib.import_module(f"{parent_folder}.{module_name}")
