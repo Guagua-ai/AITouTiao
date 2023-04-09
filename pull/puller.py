@@ -56,8 +56,13 @@ class Puller(object):
                     # check if tweet already exists
                     if Tweet.get_tweet_by_url(url):
                         continue
-                    content = self.translator.translate_to_chinese(
+                    if not self.translator.is_related_to_ai(tweet.rawContent):
+                        continue
+                    # generate chinese news feed post
+                    content = self.translator.generate_chinese_news_feed_post(
+                        tweet.user.displayname,
                         tweet.rawContent)
+                    # save tweet to db
                     title = content
                     if len(content) > 20:
                         title = content[:20]
