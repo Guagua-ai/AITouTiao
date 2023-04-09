@@ -54,7 +54,7 @@ class TranslatorCore(object):
     def generate_chinese_news_feed_post(self, author, text):
         response = openai.Completion.create(
             engine=self.config.translation_engine,
-            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped 200 Chinese words and don't translate author name) for tweet from '{author}': '{text}'",
+            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped 200 Chinese words and don't translate human names) for tweet from '{author}': '{text}'",
             max_tokens=self.config.translation_max_tokens,
             n=self.config.translation_n,
             stop=None,
