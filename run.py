@@ -8,13 +8,10 @@ from db.setup import create_database_if_not_exists
 def create_app():
     # Create the database tables
     create_database_if_not_exists('news_dev')
-
     with app.app_context():
         db.create_all()
-
+        
     return app
-
-
 
 if __name__ == '__main__':
     # Run the CLI

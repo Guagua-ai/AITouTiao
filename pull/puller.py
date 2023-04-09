@@ -1,20 +1,23 @@
+import os
 import time
+from flask import Flask
 import openai
 import urllib.parse
-from models.tweet import Tweet
-from config.config import TweetConfig
-from db.conn import get_connection
+from db.conn import db, get_connection
 from sqlalchemy.exc import IntegrityError
+from models.tweet import Tweet
+from config.tweet import TweetConfig
 import snscrape.modules.twitter as sntwitter
 
 
-class Puller:
+class Puller(object):
     ''' Puller class '''
 
-    def __init__(self, api_key, local=False):
+    def __init__(self, api_key, translator=None, local=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
         self.config = TweetConfig()
+        self.translator = translator
         self.local = local
 
     # get tweets from a user
@@ -35,75 +38,68 @@ class Puller:
 
         return tweet_list
 
-    # translate text to chinese
-    def translate_to_chinese(self, text):
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"Translate the following English text to Simplified Chinese: '{text}'",
-            max_tokens=300,
-            n=1,
-            stop=None,
-            temperature=0.4,
-        )
-
-        translation = response.choices[0].text.strip()
-        return translation
-
     # retrieve tweets of users
-    def retrieveTweetsOfUsers(self, usernames, all_tweets):
-        for username in usernames:
-            print(f"Fetching tweets from {username}")
-            tweets = self.get_tweets(username, self.config.max_results)
+    def retrieve_tweets_of_users(self, usernames):
+        all_tweets = []
+        app = Flask(__name__)
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') + '/news_dev'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        db.init_app(app)
+        with app.app_context():
+            for username in usernames:
+                print(f"Fetching tweets from {username}")
+                tweets = self.get_tweets(username, self.config.max_results)
 
-            formatted_tweets = []
-            for tweet in tweets:
-                url = f"https://twitter.com/{tweet.user.username}/status/{tweet.id}"
-                # check if tweet already exists
-                if Tweet.get_tweet_by_url(url):
-                    continue
-                content = self.translate_to_chinese(tweet.rawContent)
-                title = content
-                if len(content) > 20:
-                    title = content[:20]
-                description = content
-                if len(content) > 40:
-                    description = content[:40] + '...'
-                formatted_tweet = {
-                    'source': {
-                        'id': tweet.user.id,
-                        'name': "Twitter",
-                    },
-                    'author': tweet.user.username,
-                    'title': title,
-                    'description': description,
-                    'url': url,
-                    'urlToImage': tweet.user.profileImageUrl,
-                    'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                    'content': content,
-                }
-                formatted_tweets.append(formatted_tweet)
-            all_tweets.extend(formatted_tweets)
-        return formatted_tweets
+                formatted_tweets = []
+                for tweet in tweets:
+                    url = f"https://twitter.com/{tweet.user.username}/status/{tweet.id}"
+                    # check if tweet already exists
+                    if Tweet.get_tweet_by_url(url):
+                        continue
+                    content = self.translator.translate_to_chinese(
+                        tweet.rawContent)
+                    title = content
+                    if len(content) > 20:
+                        title = content[:20]
+                    description = content
+                    if len(content) > 40:
+                        description = content[:40] + '...'
+                    formatted_tweet = {
+                        'source': {
+                            'id': tweet.user.id,
+                            'name': "Twitter",
+                        },
+                        'author': tweet.user.username,
+                        'title': title,
+                        'description': description,
+                        'url': url,
+                        'urlToImage': tweet.user.profileImageUrl,
+                        'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                        'content': content,
+                    }
+                    formatted_tweets.append(formatted_tweet)
+                all_tweets.extend(formatted_tweets)
+        return all_tweets
 
     # run the puller
-    def run(self):
+    def run(self, usernames=[]):
         start_time = time.time()
 
-        usernames = ['elonmusk', 'sama', 'ylecun']
+        if not usernames:
+            usernames = ['elonmusk', 'sama', 'ylecun']
 
         # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
         #                   'goodfellow_ian', 'ylecun', 'karpathy']
 
-        all_tweets = []
-        formatted_tweets = self.retrieveTweetsOfUsers(usernames, all_tweets)
-
+        all_tweets = self.retrieve_tweets_of_users(usernames)
+        
         if self.local:
             import pandas as pd
-            df = pd.DataFrame(formatted_tweets)
+            df = pd.DataFrame(all_tweets)
             df.to_csv('ai_tweets_translated.csv', index=False)
         else:
             session = get_connection()
-            for tweet in formatted_tweets:
+            for tweet in all_tweets:
                 new_tweet = Tweet(
                     source_id=tweet['source']['id'],
                     source_name=tweet['source']['name'],
@@ -113,6 +109,7 @@ class Puller:
                     url=tweet['url'],
                     url_to_image=tweet['urlToImage'],
                     published_at=tweet['publishedAt'],
+                    created_at=time.strftime('%Y-%m-%d %H:%M:%S'),
                     content=tweet['content'],
                 )
                 session.add(new_tweet)

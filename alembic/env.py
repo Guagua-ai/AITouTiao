@@ -7,8 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from alembic import context
 
-from models.tweet import Tweet
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

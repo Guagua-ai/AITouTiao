@@ -1,7 +1,7 @@
 import configparser
 
 
-class ChatbotConfig(object):
+class TranslatorConfig(object):
     config = None
     translation_engine = None
     translation_max_tokens = None
@@ -22,16 +22,3 @@ class ChatbotConfig(object):
         self.translation_stop = self.config.get('translation', 'stop')
         self.translation_temperature = self.config.getfloat(
             'translation', 'temperature')
-
-
-class TweetConfig(object):
-    config = None
-    max_results = None
-
-    def __init__(self) -> None:
-        # Create a ConfigParser object and read the config file
-        self.config = configparser.ConfigParser()
-        self.config.read('./config/config.ini')
-
-        # Read the translation settings from the config file
-        self.max_results = self.config.getint('twitter', 'max_num_results')

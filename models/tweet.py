@@ -1,6 +1,7 @@
+import datetime
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
-from app import db
+from db import db
 
 
 class Tweet(db.Model):
@@ -16,6 +17,7 @@ class Tweet(db.Model):
     url = Column(String, unique=True)
     url_to_image = Column(String)
     published_at = Column(DateTime)
+    created_at = Column(DateTime)
     content = Column(String)
 
     # Alternatively, you can use this approach for multiple constraints
@@ -52,6 +54,7 @@ class Tweet(db.Model):
                           url=url, 
                           url_to_image=url_to_image, 
                           published_at=published_at, 
+                          created_at=datetime.now(),
                           content=content)
         db.session.add(new_tweet)
         db.session.commit()
