@@ -1,1 +1,1 @@
-from .conn import get_connection
+from .conn import get_connection, db

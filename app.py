@@ -1,4 +1,3 @@
-from translator.core import TranslatorCore
 import os
 from dotenv import load_dotenv
 from flask import Flask
@@ -7,8 +6,12 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_redis import FlaskRedis
-from workflow import FlowMachine
 from flask_migrate import Migrate
+from workflow import FlowMachine
+from translator.core import TranslatorCore
+from chat.chatbot import Chatbot
+from pull.puller import Puller
+from db import db
 
 # Load environment variables
 load_dotenv('.env')
@@ -27,7 +30,7 @@ login_manager.login_message_category = 'info'
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') + '/news_dev'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 
 # Set the secret key to sign the JWT tokens
@@ -56,11 +59,9 @@ app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
 translator = TranslatorCore(api_key=open_ai_api)
 
 # Create the puller
-from pull.puller import Puller
 puller = Puller(api_key=open_ai_api,
                 translator=translator,
                 local=enable_local_mode)
 
 # Create the chatbot
-from chat.chatbot import Chatbot
 chatbot = Chatbot(api_key=open_ai_api, local=enable_local_mode)

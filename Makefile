@@ -16,7 +16,7 @@ prod:
 	gunicorn --timeout 300 --bind 0.0.0.0:8080 'run:create_app()'
 
 workflow:
-	rq worker
+	$(PYTHON) worker.py
 
 test:
 	$(PYTHON) -m pytest tests/

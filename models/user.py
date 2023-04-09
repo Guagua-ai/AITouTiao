@@ -3,7 +3,8 @@ from flask_login import UserMixin
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import Column, Integer, String, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login_manager
+from app import login_manager
+from db import db
 
 
 class User(db.Model, UserMixin):
