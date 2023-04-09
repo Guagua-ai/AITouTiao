@@ -11,6 +11,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SendGridMail
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from modules.utlis import require_valid_user
+from search.index import create_user_search_index
 
 
 @app.route('/auth/signup', methods=['POST'])
@@ -47,6 +48,12 @@ def signup():
     access_token = create_access_token(identity=user.id, additional_claims={
                                        "is_admin": user.is_admin()})
     refresh_token = create_refresh_token(identity=user.id)
+
+    create_user_search_index().save_object({
+        "objectID": user.id,
+        "name": user.name,
+        "email": user.email,
+    })
 
     return jsonify({
         'message': 'User created successfully',
@@ -142,6 +149,7 @@ def delete_account():
 
     if user:
         User.delete_user(user_id)  # Delete the user from the database
+        create_user_search_index().delete_object(user_id)  # Delete the user from the search index
         return jsonify({"message": "User account deleted successfully"}), 200
     else:
         return jsonify({"message": "User not found"}), 404

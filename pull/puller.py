@@ -4,6 +4,7 @@ from flask import Flask
 import openai
 import urllib.parse
 from db.conn import db, get_connection
+from search import create_post_search_index
 from sqlalchemy.exc import IntegrityError
 from models.tweet import Tweet
 from config.tweet import TweetConfig
@@ -85,27 +86,10 @@ class Puller(object):
                     formatted_tweets.append(formatted_tweet)
                 all_tweets.extend(formatted_tweets)
         return all_tweets
-
-    # run the puller
-    def run(self, usernames=[]):
-        start_time = time.time()
-
-        if not usernames:
-            usernames = ['elonmusk', 'sama', 'ylecun']
-
-        # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
-        #                   'goodfellow_ian', 'ylecun', 'karpathy']
-
-        all_tweets = self.retrieve_tweets_of_users(usernames)
-        
-        if self.local:
-            import pandas as pd
-            df = pd.DataFrame(all_tweets)
-            df.to_csv('ai_tweets_translated.csv', index=False)
-        else:
-            session = get_connection()
-            for tweet in all_tweets:
-                new_tweet = Tweet(
+    
+    # store tweets to database
+    def store_tweets_to_database(self, session, tweet):
+        new_tweet = Tweet(
                     source_id=tweet['source']['id'],
                     source_name=tweet['source']['name'],
                     author=tweet['author'],
@@ -117,13 +101,54 @@ class Puller(object):
                     created_at=time.strftime('%Y-%m-%d %H:%M:%S'),
                     content=tweet['content'],
                 )
-                session.add(new_tweet)
-                try:
-                    session.commit()
-                except IntegrityError:
-                    session.rollback()
-                    print(f"Duplicate URL found: {tweet['url']}")
+        session.add(new_tweet)
+        try:
+            session.commit()
+        except IntegrityError:
+            session.rollback()
+            print(f"Duplicate URL found: {tweet['url']}")
+        return new_tweet
+
+    # create search index
+    def create_search_index(new_tweet):
+        return ({
+            "objectID": new_tweet.id,
+            "author": new_tweet.author,
+            "title": new_tweet.title,
+            "description": new_tweet.description,
+            "url": new_tweet.url,
+            "url_to_image": new_tweet.url_to_image,
+            "published_at": new_tweet.published_at,
+            "content": new_tweet.content,
+        })
+    
+    # run the puller
+    def run(self, usernames=[]):
+        start_time = time.time()
+
+        if not usernames:
+            usernames = ['elonmusk', 'sama', 'ylecun']
+
+        # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
+        #                   'goodfellow_ian', 'ylecun', 'karpathy']
+
+        all_tweets = self.retrieve_tweets_of_users(usernames)
+        all_tweets_indices = []
+        
+        if self.local:
+            import pandas as pd
+            df = pd.DataFrame(all_tweets)
+            df.to_csv('ai_tweets_translated.csv', index=False)
+        else:
+            session = get_connection()
+            for tweet in all_tweets:
+                new_tweet = self.store_tweets_to_database(session, tweet)
+                # create search index
+                all_tweets_indices.append(create_post_search_index(new_tweet))
             session.close()
+
+        # save to algolia in batches
+        create_post_search_index().save_objects(all_tweets_indices)
 
         elapsed_time = time.time() - start_time
         if self.local:

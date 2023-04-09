@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
-from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_redis import FlaskRedis
 from flask_migrate import Migrate

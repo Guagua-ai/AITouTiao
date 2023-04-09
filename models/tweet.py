@@ -26,6 +26,21 @@ class Tweet(db.Model):
     def __repr__(self):
         return f"<Tweet(id={self.id}, author={self.author}, title={self.title}, url={self.url})>"
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'source_id': self.source_id,
+            'source_name': self.source_name,
+            'author': self.author,
+            'title': self.title,
+            'description': self.description,
+            'url': self.url,
+            'url_to_image': self.url_to_image,
+            'published_at': self.published_at,
+            'created_at': self.created_at,
+            'content': self.content,
+        }
+
     def get_all_tweets():
         return Tweet.query.order_by(Tweet.published_at.desc()).all()
 
