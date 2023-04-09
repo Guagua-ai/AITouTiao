@@ -1,7 +1,7 @@
 import csv
 import os
 import openai
-from config.config import ChatbotConfig
+from config.chatbot import ChatbotConfig
 from chat.result import format_results
 from db import get_connection
 from models.tweet import Tweet

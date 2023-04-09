@@ -15,6 +15,9 @@ run:
 prod:
 	gunicorn --timeout 300 --bind 0.0.0.0:8080 'run:create_app()'
 
+workflow:
+	rq worker
+
 test:
 	$(PYTHON) -m pytest tests/
 
@@ -32,4 +35,4 @@ update:
 migrate:
 	alembic upgrade head
 
-.PHONY: all install run prod test clean update collect migrate
+.PHONY: all install run prod worker test clean update collect migrate

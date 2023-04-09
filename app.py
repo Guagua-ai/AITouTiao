@@ -6,7 +6,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_redis import FlaskRedis
-from jobq.queue import NewsQueue
+from workflow import FlowMachine
 from flask_migrate import Migrate
 
 # Load environment variables
@@ -46,7 +46,7 @@ open_ai_api = os.getenv('OPENAI_API_KEY')
 enable_local_mode = os.getenv("LOCAL_MODE", "False") == "True"
 
 # Create the queue
-q = NewsQueue(connection=os.getenv('REDIS_URL'))
+q = FlowMachine(connection=os.getenv('REDIS_URL'))
 
 # Configure SendGrid
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')

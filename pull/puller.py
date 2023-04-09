@@ -2,7 +2,7 @@ import time
 import openai
 import urllib.parse
 from models.tweet import Tweet
-from config.config import TweetConfig
+from config.tweet import TweetConfig
 from db.conn import get_connection
 from sqlalchemy.exc import IntegrityError
 import snscrape.modules.twitter as sntwitter
@@ -35,22 +35,8 @@ class Puller:
 
         return tweet_list
 
-    # translate text to chinese
-    def translate_to_chinese(self, text):
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"Translate the following English text to Simplified Chinese: '{text}'",
-            max_tokens=300,
-            n=1,
-            stop=None,
-            temperature=0.4,
-        )
-
-        translation = response.choices[0].text.strip()
-        return translation
-
     # retrieve tweets of users
-    def retrieveTweetsOfUsers(self, usernames, all_tweets):
+    def retrieve_tweets_of_users(self, usernames, all_tweets):
         for username in usernames:
             print(f"Fetching tweets from {username}")
             tweets = self.get_tweets(username, self.config.max_results)
@@ -95,7 +81,7 @@ class Puller:
         #                   'goodfellow_ian', 'ylecun', 'karpathy']
 
         all_tweets = []
-        formatted_tweets = self.retrieveTweetsOfUsers(usernames, all_tweets)
+        formatted_tweets = self.retrieve_tweets_of_users(usernames, all_tweets)
 
         if self.local:
             import pandas as pd
