@@ -1,20 +1,22 @@
 import time
 import openai
 import urllib.parse
-from models.tweet import Tweet
-from config.tweet import TweetConfig
 from db.conn import get_connection
 from sqlalchemy.exc import IntegrityError
+from models.tweet import Tweet
+from config.tweet import TweetConfig
+
 import snscrape.modules.twitter as sntwitter
 
 
-class Puller:
+class Puller(object):
     ''' Puller class '''
 
-    def __init__(self, api_key, local=False):
+    def __init__(self, api_key, translator=None, local=False):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
         self.config = TweetConfig()
+        self.translator = translator
         self.local = local
 
     # get tweets from a user
@@ -47,7 +49,8 @@ class Puller:
                 # check if tweet already exists
                 if Tweet.get_tweet_by_url(url):
                     continue
-                content = self.translate_to_chinese(tweet.rawContent)
+                content = self.translator.translate_to_chinese(
+                    tweet.rawContent)
                 title = content
                 if len(content) > 20:
                     title = content[:20]

@@ -1,3 +1,4 @@
+from translator.core import TranslatorCore
 import os
 from dotenv import load_dotenv
 from flask import Flask
@@ -51,9 +52,14 @@ q = FlowMachine(connection=os.getenv('REDIS_URL'))
 # Configure SendGrid
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
 
+# Create the translator
+translator = TranslatorCore(api_key=open_ai_api)
+
 # Create the puller
 from pull.puller import Puller
-puller = Puller(api_key=open_ai_api, local=enable_local_mode)
+puller = Puller(api_key=open_ai_api,
+                translator=translator,
+                local=enable_local_mode)
 
 # Create the chatbot
 from chat.chatbot import Chatbot

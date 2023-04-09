@@ -1,22 +1,16 @@
 import os
 import openai
 from config.translator import TranslatorConfig
-from workflow import NewsQueue
 
 class TranslatorCore(object):
     ''' Translator class '''
-
     config = None
-    q = None
 
-    def __init__(self, api_key=None, redis_url=None):
+    def __init__(self, api_key=None):
         assert api_key is not None, 'API key is required'
         openai.api_key = api_key
         self.config = TranslatorConfig()
-        self.q = NewsQueue(connection=redis_url)
 
-
-    # translate text to chinese
     def translate_to_chinese(self, text):
             response = openai.Completion.create(
                 engine= self.config.translation_engine,
@@ -29,7 +23,3 @@ class TranslatorCore(object):
 
             translation = response.choices[0].text.strip()
             return translation
-    
-    def run_async(self, text):
-        translated = self.translate_to_chinese(text)
-        self.q.enqueue('jobq.jobs.translate_to_chinese', translated)
