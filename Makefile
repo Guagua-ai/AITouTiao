@@ -35,4 +35,4 @@ update:
 migrate:
 	alembic upgrade head
 
-.PHONY: all install run prod worker test clean update collect migrate
+.PHONY: all install run prod workflow test clean update collect migrate

@@ -1,7 +1,7 @@
 import os
 import openai
 from config.translator import TranslatorConfig
-from workflow.queue import NewsQueue
+from workflow import NewsQueue
 
 class TranslatorCore(object):
     ''' Translator class '''
