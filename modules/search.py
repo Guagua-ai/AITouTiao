@@ -3,6 +3,7 @@ from app import app
 from flask import jsonify, request
 from models.tweet import Tweet
 from models.user import User
+from modules.utlis import require_valid_user
 from search.index import create_post_search_index, create_user_search_index
 
 
@@ -37,6 +38,7 @@ def search_tweets():
 
 
 @app.route('/search/users', methods=['GET'])
+@require_valid_user
 def search_users():
     query = request.args.get('q', '')
 
