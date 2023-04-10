@@ -1,7 +1,11 @@
 import datetime
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
-from db import db
+from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, desc
+from sqlalchemy.orm import relationship
+from models.view_history import ViewHistory
+from models.collection import Collection
+from models.collection_tweet import CollectionsTweets
+from models import db
 
 
 class Tweet(db.Model):
@@ -19,6 +23,9 @@ class Tweet(db.Model):
     published_at = Column(DateTime)
     created_at = Column(DateTime)
     content = Column(String)
+
+    collections = relationship(
+        'Collection', secondary='collections_tweets', back_populates='tweets')
 
     # Alternatively, you can use this approach for multiple constraints
     __table_args__ = (UniqueConstraint('url'),)
@@ -43,6 +50,9 @@ class Tweet(db.Model):
 
     def get_all_tweets():
         return Tweet.query.order_by(Tweet.published_at.desc()).all()
+
+    def get_tweets_by_ids(ids):
+        return Tweet.query.filter(Tweet.id.in_(ids)).all()
 
     def get_tweet_by_id(id):
         return Tweet.query.filter_by(id=id).first()
@@ -91,6 +101,12 @@ class Tweet(db.Model):
         tweet_to_delete = Tweet.query.filter_by(id=id).first()
         db.session.delete(tweet_to_delete)
         db.session.commit()
+
+    @staticmethod
+    def get_view_history(user_id):
+        tweets = Tweet.query.filter(Tweet.id.in_(db.session.query(
+            ViewHistory.post_id).filter_by(user_id=user_id))).all()
+        return tweets
 
 
 class TweetSchema(SQLAlchemyAutoSchema):

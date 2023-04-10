@@ -1,12 +1,12 @@
 from app import app, chatbot
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
+from flask_jwt_extended import get_jwt_identity
 from models.user import User
+from modules.utlis import require_valid_user
 
 
 @app.route('/chat', methods=['POST'])
-@jwt_required()
+@require_valid_user
 def chat():
     current_user = User.get_user_by_id(get_jwt_identity())
     if not current_user:
@@ -21,7 +21,7 @@ def chat():
 
 
 @app.route('/chat/count', methods=['GET'])
-@jwt_required()
+@require_valid_user
 def count_total_records():
     current_user = User.get_user_by_id(get_jwt_identity())
     if not current_user:

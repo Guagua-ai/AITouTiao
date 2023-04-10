@@ -1,10 +1,11 @@
 import csv
+import datetime
 import os
 import openai
 from config.chatbot import ChatbotConfig
 from chat.result import format_results
-from db import get_connection
-from models.tweet import Tweet
+from chat import Tweet, get_connection
+from utils.time import standard_format
 
 
 class Chatbot:
@@ -142,7 +143,7 @@ class Chatbot:
                     "description": row.description,
                     "url": row.url,
                     "urlToImage": row.url_to_image,
-                    "publishedAt": row.published_at,
+                    "publishedAt": standard_format(row.published_at),
                     "content": row.content
                 })
 

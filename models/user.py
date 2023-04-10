@@ -4,7 +4,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import Column, Integer, String, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import login_manager
-from db import db
+from models import db
 
 
 class User(db.Model, UserMixin):
@@ -21,6 +21,7 @@ class User(db.Model, UserMixin):
     quota = Column(Integer, default=40)
     profile_image = Column(
         String(200), default='https://source.boringavatars.com/beam/30/name')
+        
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -56,6 +57,7 @@ class User(db.Model, UserMixin):
         return User.query.filter_by(name=name).first()
 
     def get_all_users():
+        
         return User.query.all()
 
     def create_user(name, email, password, role='user', quota=100, profile_image=None):
