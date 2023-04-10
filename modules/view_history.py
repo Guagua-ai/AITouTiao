@@ -15,7 +15,7 @@ def add_to_view_history():
     if not current_user.id or not tweet_id:
         return jsonify({'error': 'User ID and tweet ID are required'}), 400
     view_history = ViewHistory.add_to_view_history(current_user.id, tweet_id)
-    return jsonify({'user_id': view_history.user_id, 'tweet_id': view_history.tweet_id, 'timestamp': view_history.timestamp}), 201
+    return jsonify({'user_id': view_history.user_id, 'tweet_id': view_history.post_id, 'timestamp': view_history.timestamp}), 201
 
 
 @app.route('/view_history', methods=['GET'])
