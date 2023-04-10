@@ -1,5 +1,4 @@
-import os
-import re
+import json
 import openai
 from config.translator import TranslatorConfig
 
@@ -54,7 +53,7 @@ class TranslatorCore(object):
     def generate_chinese_news_feed_post(self, author, text):
         response = openai.Completion.create(
             engine=self.config.translation_engine,
-            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped 200 Chinese words and don't translate human names) for tweet from '{author}': '{text}'",
+            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped 200 Chinese characters and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
             max_tokens=self.config.translation_max_tokens,
             n=self.config.translation_n,
             stop=None,
@@ -62,4 +61,6 @@ class TranslatorCore(object):
         )
 
         news_feed_post = response.choices[0].text.strip()
-        return news_feed_post
+        print(news_feed_post)
+        news_feed_post_json = json.loads(news_feed_post)
+        return news_feed_post_json['title'], news_feed_post_json['content']

@@ -11,8 +11,20 @@ def search_tweets():
     # Get the search query from the request query parameters
     query = request.args.get('q')
 
+    # Define the search parameters, including the fuzzy search query and settings
+    request_options = {
+        "query": query,
+        "typoTolerance": "true",
+        "minWordSizefor1Typo": 4,
+        "minWordSizefor2Typos": 8,
+        "ignorePlurals": "true",
+        "advancedSyntax": "true",
+        "page": 0,
+        "hitsPerPage": 20,
+    }
+
     # Use the Algolia index to search for tweets that match the query
-    results = create_post_search_index().search(query)
+    results = create_post_search_index().search(query, request_options)
 
     # Get the tweet IDs from the search results
     tweet_ids = [result['objectID'] for result in results['hits']]

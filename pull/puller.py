@@ -60,11 +60,10 @@ class Puller(object):
                     if not self.translator.is_related_to_ai(tweet.rawContent):
                         continue
                     # generate chinese news feed post
-                    content = self.translator.generate_chinese_news_feed_post(
+                    title, content = self.translator.generate_chinese_news_feed_post(
                         tweet.user.displayname,
                         tweet.rawContent)
                     # save tweet to db
-                    title = content
                     if len(content) > 20:
                         title = content[:20]
                     description = content
@@ -144,7 +143,7 @@ class Puller(object):
             for tweet in all_tweets:
                 new_tweet = self.store_tweets_to_database(session, tweet)
                 # create search index
-                all_tweets_indices.append(create_post_search_index(new_tweet))
+                all_tweets_indices.append(Puller.create_search_index(new_tweet))
             session.close()
 
         # save to algolia in batches
