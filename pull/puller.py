@@ -63,6 +63,8 @@ class Puller(object):
                     title, content = self.translator.generate_chinese_news_feed_post(
                         tweet.user.displayname,
                         tweet.rawContent)
+                    if not title or not content:
+                        continue
                     # save tweet to db
                     if len(content) > 20:
                         title = content[:20]

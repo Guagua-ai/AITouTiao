@@ -53,7 +53,7 @@ class TranslatorCore(object):
     def generate_chinese_news_feed_post(self, author, text):
         response = openai.Completion.create(
             engine=self.config.translation_engine,
-            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped 200 Chinese characters and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
+            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped under 200 Chinese characters, remove all urls and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
             max_tokens=self.config.translation_max_tokens,
             n=self.config.translation_n,
             stop=None,
@@ -62,5 +62,28 @@ class TranslatorCore(object):
 
         news_feed_post = response.choices[0].text.strip()
         print(news_feed_post)
-        news_feed_post_json = json.loads(news_feed_post)
-        return news_feed_post_json['title'], news_feed_post_json['content']
+        try:
+            news_feed_post_json = json.loads(news_feed_post)
+            return self.parser(news_feed_post_json)
+        except json.decoder.JSONDecodeError:
+            return None, None
+
+    def parser(self, processed_json):
+        title_keys = ['title', 'Title', 'TITLE']
+        content_keys = ['content', 'Content', 'CONTENT']
+
+        for key in title_keys:
+            if key in processed_json:
+                title = processed_json[key]
+                break
+        else:
+            title = None
+
+        for key in content_keys:
+            if key in processed_json:
+                content = processed_json[key]
+                break
+        else:
+            content = None
+
+        return title, content
