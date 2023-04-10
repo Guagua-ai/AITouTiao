@@ -66,8 +66,6 @@ class Puller(object):
                     if not title or not content:
                         continue
                     # save tweet to db
-                    if len(content) > 20:
-                        title = content[:20]
                     description = content
                     if len(content) > 40:
                         description = content[:40] + '...'
