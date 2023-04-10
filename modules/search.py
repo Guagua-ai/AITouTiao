@@ -6,7 +6,7 @@ from models.user import User
 from search.index import create_post_search_index, create_user_search_index
 
 
-@app.route('/posts/search', methods=['GET'])
+@app.route('/search/posts', methods=['GET'])
 def search_tweets():
     # Get the search query from the request query parameters
     query = request.args.get('q')
