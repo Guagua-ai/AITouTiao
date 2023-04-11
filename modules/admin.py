@@ -53,7 +53,7 @@ def download_tweet_images():
                 continue
             image_data = response.content
 
-            bucket_key = os.getenv('DEPLOY_ENV') + '-news-tweet-photo'
+            bucket_key = 'server-news-tweet-photo'
 
             # Upload the image to S3
             object_key = f'tweets/{tweet.author}.jpg'
