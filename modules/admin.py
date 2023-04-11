@@ -1,7 +1,12 @@
+from io import BytesIO
+import os
+import requests
 from app import app
 from flask import jsonify
+from db import s3
 from models.user import User
-from modules.utlis import admin_required, require_valid_user, current_user
+from models.tweet import Tweet
+from modules.utlis import admin_required, require_valid_user
 
 
 @app.route('/admin/promote/<int:user_id>', methods=['POST'])
@@ -26,3 +31,39 @@ def promote_user(user_id):
 
     User.update_user(user_id, is_admin=True)
     return jsonify({'message': 'User promoted successfully'}), 200
+
+
+
+@app.route('/admin/download_tweet_images', methods=['POST'])
+def download_tweet_images():
+    """
+    Downloads images from all tweets' url_to_image and uploads them to S3.
+    """
+    tweets = Tweet.get_all_tweets()
+    url_set = set()
+    for tweet in tweets:
+        url_to_image = tweet.url_to_image
+        if url_to_image and url_to_image not in url_set:
+            # Download image from URL
+            response = requests.get(url_to_image)
+            if response.status_code != 200:
+                continue
+            image_data = response.content
+
+            bucket_key = os.getenv('DEPLOY_ENV') + '-news-tweet-photo'
+
+            # Upload the image to S3
+            object_key = f'tweets/{tweet.author}.jpg'
+            s3.put_object(Bucket=bucket_key, Key=object_key, Body=image_data)
+
+            # Get the URL of the S3 object
+            object_url = f'https://{bucket_key}.s3.amazonaws.com/{object_key}'
+
+            # Update the tweet's url_to_image field
+            Tweet.update_tweet(tweet.id, url_to_image=object_url)
+
+            # Add the URL to the set
+            url_set.add(url_to_image)
+
+    print('url_set: ', url_set.to_list())
+    return jsonify({'message': 'Images downloaded and uploaded successfully'}), 200

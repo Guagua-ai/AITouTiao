@@ -84,17 +84,26 @@ class Tweet(db.Model):
         db.session.add(new_tweet)
         db.session.commit()
 
-    def update_tweet(id, source_id, source_name, author, title, description, url, url_to_image, published_at, content):
+    def update_tweet(id, source_id=None, source_name=None, author=None, title=None, description=None, url=None, url_to_image=None, published_at=None, content=None):
         tweet_to_update = Tweet.query.filter_by(id=id).first()
-        tweet_to_update.source_id = source_id
-        tweet_to_update.source_name = source_name
-        tweet_to_update.author = author
-        tweet_to_update.title = title
-        tweet_to_update.description = description
-        tweet_to_update.url = url
-        tweet_to_update.url_to_image = url_to_image
-        tweet_to_update.published_at = published_at
-        tweet_to_update.content = content
+        if source_id is not None:
+            tweet_to_update.source_id = source_id
+        if source_name is not None:
+            tweet_to_update.source_name = source_name
+        if author is not None:
+            tweet_to_update.author = author
+        if title is not None:
+            tweet_to_update.title = title
+        if description is not None:
+            tweet_to_update.description = description
+        if url is not None:
+            tweet_to_update.url = url
+        if url_to_image is not None:
+            tweet_to_update.url_to_image = url_to_image
+        if published_at is not None:
+            tweet_to_update.published_at = published_at
+        if content is not None:
+            tweet_to_update.content = content
         db.session.commit()
 
     def delete_tweet(id):

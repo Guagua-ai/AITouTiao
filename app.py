@@ -54,6 +54,9 @@ q = FlowMachine(connection=os.getenv('REDIS_URL'))
 # Configure SendGrid
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
 
+# Configure S3
+app.config['S3_BUCKET_NAME'] = os.getenv('DEPLOY_ENV') + '-news-tweet-photo'
+
 # Create the translator
 translator = TranslatorCore(api_key=open_ai_api)
 
