@@ -3,7 +3,10 @@ import time
 from flask import Flask
 import openai
 import urllib.parse
+
+import requests
 from db.conn import db, get_connection
+from db.storage import check_if_object_exists_on_s3, upload_image_to_s3
 from search import create_post_search_index
 from sqlalchemy.exc import IntegrityError
 from models.tweet import Tweet
@@ -47,6 +50,7 @@ class Puller(object):
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         db.init_app(app)
         with app.app_context():
+            image_set = set()
             for username in usernames:
                 print(f"Fetching tweets from {username}")
                 tweets = self.get_tweets(username, self.config.max_results)
@@ -69,6 +73,8 @@ class Puller(object):
                     description = content
                     if len(content) > 40:
                         description = content[:40] + '...'
+
+                    url_to_image = self.process_image(tweet, image_set)
                     formatted_tweet = {
                         'source': {
                             'id': tweet.user.id,
@@ -78,7 +84,7 @@ class Puller(object):
                         'title': title,
                         'description': description,
                         'url': url,
-                        'urlToImage': tweet.user.profileImageUrl,
+                        'urlToImage': url_to_image,
                         'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                         'content': content,
                     }
@@ -86,6 +92,44 @@ class Puller(object):
                 all_tweets.extend(formatted_tweets)
         return all_tweets
     
+    def process_image(self, tweet, image_set):
+        if not tweet.user.profileImageUrl:
+            return tweet.user.profileImageUrl
+
+        if tweet.user.profileImageUrl in image_set:
+            return tweet.user.profileImageUrl
+
+        # Check if image is already in S3
+        if "s3.amazonaws.com" in tweet.user.profileImageUrl:
+            return tweet.user.profileImageUrl
+
+        # Get the bucket key and object key
+        bucket_key = 'server-news-tweet-photo'
+        object_key = f'tweets/{tweet.user.username}.jpg'
+
+        # Get the URL of the S3 object
+        object_url = f'https://{bucket_key}.s3.amazonaws.com/{object_key}'
+
+        # Check if image is already in S3
+        if check_if_object_exists_on_s3(bucket_key, object_key):
+            return object_url
+
+        # Download image from URL
+        response = requests.get(tweet.user.profileImageUrl)
+        if response.status_code != 200:
+            return tweet.user.profileImageUrl
+        image_data = response.content
+
+        # Upload image to S3
+        bucket_key = 'server-news-tweet-photo'
+        success = upload_image_to_s3(bucket_key, object_key, image_data)
+        if not success:
+            return tweet.user.profileImageUrl
+
+        # Add image to image_set
+        image_set.add(tweet.user.profileImageUrl)
+        return object_url
+
     # store tweets to database
     def store_tweets_to_database(self, session, tweet):
         new_tweet = Tweet(
@@ -121,6 +165,18 @@ class Puller(object):
             "content": new_tweet.content,
         })
     
+    def download_tweet_image(self, tweet) -> str:
+        if not tweet.url_to_image:
+            return tweet.url_to_image
+        # download image
+        if "s3.amazonaws.com" in tweet.url_to_image:
+            return tweet.url_to_image
+
+        if db.check_if_object_exists(tweet.url_to_image):
+            return tweet.url_to_image
+
+        return tweet
+
     # run the puller
     def run(self, usernames=[]):
         start_time = time.time()

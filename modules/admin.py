@@ -1,8 +1,7 @@
-import os
 import requests
 from app import app
 from flask import jsonify
-from db import get_s3_client, check_if_object_exists
+from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
 from modules.utlis import admin_required, require_valid_user
@@ -57,8 +56,9 @@ def download_tweet_images():
 
             # Upload the image to S3
             object_key = f'tweets/{tweet.author}.jpg'
-            get_s3_client().put_object(Bucket=bucket_key, Key=object_key,
-                                       Body=image_data, ContentType='image/jpeg')
+            success = upload_image_to_s3(bucket_key, object_key, image_data)
+            if not success:
+                continue
 
             # Get the URL of the S3 object
             object_url = f'https://{bucket_key}.s3.amazonaws.com/{object_key}'
