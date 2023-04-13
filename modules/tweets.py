@@ -3,6 +3,9 @@ from urllib import request
 from app import app, chatbot
 from flask import request, jsonify
 
+from models.tweet import Tweet
+from utils.time import standard_format
+
 
 @app.route('/tweets', methods=['GET'])
 def tweets():
@@ -64,3 +67,26 @@ def tweets_pagination():
         response_packet['next_start_token'] = next_start_token
 
     return jsonify(response_packet)
+
+
+@app.route('/tweet/<int:tweet_id>', methods=['GET'])
+def get_tweet_by_id(tweet_id):
+    tweet = Tweet.query.get(tweet_id)
+    if tweet is not None:
+        tweet_data = {
+            "id": tweet.id,
+            "source": {
+                'id': tweet.source_id,
+                'name': tweet.source_name
+            },
+            "author": tweet.author,
+            "title": tweet.title,
+            "description": tweet.description,
+            "url": tweet.url,
+            "urlToImage": tweet.url_to_image,
+            "publishedAt": standard_format(tweet.published_at),
+            "content": tweet.content
+        }
+        return jsonify(tweet_data), 200
+    else:
+        return jsonify({'error': 'Tweet not found'}), 404
