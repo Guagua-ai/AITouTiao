@@ -184,9 +184,6 @@ class Puller(object):
         if not usernames:
             usernames = ['elonmusk', 'sama', 'ylecun']
 
-        # more_usernames = ['OpenAI', 'DeepMind', 'demishassabis',
-        #                   'goodfellow_ian', 'ylecun', 'karpathy']
-
         all_tweets = self.retrieve_tweets_of_users(usernames)
         all_tweets_indices = []
         
