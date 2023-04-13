@@ -1,6 +1,8 @@
+from io import BytesIO
+from PIL import Image
 import os
 import time
-from db.storage import get_s3_client
+from db.storage import get_s3_client, upload_image_to_s3
 import models
 
 from app import app, redis_store
@@ -188,12 +190,21 @@ def upload_profile():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
     
+    if file.content_length > 10 * 1024 * 1024:  # 10 MB max file size
+        return jsonify({'error': 'File size exceeds the allowed limit'}), 400
+
     user = User.get_user_by_id(get_jwt_identity())
     if user.profile_image != 'common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg' and user.profile_image.startswith('https://common-profile.s3.us-west-1.amazonaws.com'):
         get_s3_client().delete_object(Bucket='common-profile', Key=user.profile_image.split('/')[-1])
 
     file_path = secure_filename(file.filename)
-    get_s3_client().upload_fileobj(file, 'common-profile', file_path, ExtraArgs={'ACL': 'public-read'})
+
+    # Resize the image to ensure it's smaller than 2 MB
+    resized_image_file = BytesIO()
+    resized_image_file = resize_image(file, 2 * 1024 * 1024)
+
+    if not upload_image_to_s3('common-profile', file_path, resized_image_file):
+        return jsonify({'error': 'Unable to upload file'}), 500
     User.update_user(user.id, profile_image=f'https://common-profile.s3.us-west-1.amazonaws.com/{file_path}')
 
     response = {
@@ -252,3 +263,19 @@ def send_email(to, token):
         html_content=f'<p>Please click the link below to reset your password:</p><br><a href="{reset_url}">{reset_url}</a>'
     )
     sg.send(mail)
+
+
+def resize_image(file, max_size):
+    img = Image.open(file)
+    img_format = img.format
+
+    width, height = img.size
+    while file.tell() > max_size:
+        width *= 0.9
+        height *= 0.9
+        img = img.resize((int(width), int(height)), Image.ANTIALIAS)
+        file.seek(0)
+        img.save(file, format=img_format)
+
+    file.seek(0)
+    return file
