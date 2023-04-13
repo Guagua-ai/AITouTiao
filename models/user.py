@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
                         onupdate=datetime.utcnow)
     quota = Column(Integer, default=40)
     profile_image = Column(
-        String(200), default='https://source.boringavatars.com/beam/30/name')
+        String(200), default='https://common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg')
         
 
     def __repr__(self):
