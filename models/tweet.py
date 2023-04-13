@@ -15,6 +15,7 @@ class Tweet(db.Model):
     source_id = Column(String)
     source_name = Column(String)
     author = Column(String)
+    display_name = Column(String)
     title = Column(String)
     description = Column(String)
     # Add the unique constraint directly to the column
@@ -31,7 +32,7 @@ class Tweet(db.Model):
     __table_args__ = (UniqueConstraint('url'),)
 
     def __repr__(self):
-        return f"<Tweet(id={self.id}, author={self.author}, title={self.title}, url={self.url})>"
+        return f"<Tweet(id={self.id}, author={self.author}, displayname={self.display_name}, title={self.title}, url={self.url})>"
 
     def to_dict(self):
         return {
@@ -39,6 +40,7 @@ class Tweet(db.Model):
             'source_id': self.source_id,
             'source_name': self.source_name,
             'author': self.author,
+            'display_name': self.display_name,
             'title': self.title,
             'description': self.description,
             'url': self.url,
@@ -70,10 +72,11 @@ class Tweet(db.Model):
     def count_tweets():
         return Tweet.query.count()
 
-    def add_tweet(source_id, source_name, author, title, description, url, url_to_image, published_at, content):
+    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, published_at, content):
         new_tweet = Tweet(source_id=source_id, 
                           source_name=source_name, 
                           author=author, 
+                          display_name=display_name,
                           title=title,
                           description=description, 
                           url=url, 
@@ -84,7 +87,7 @@ class Tweet(db.Model):
         db.session.add(new_tweet)
         db.session.commit()
 
-    def update_tweet(id, source_id=None, source_name=None, author=None, title=None, description=None, url=None, url_to_image=None, published_at=None, content=None):
+    def update_tweet(id, source_id=None, source_name=None, author=None, display_name=None, title=None, description=None, url=None, url_to_image=None, published_at=None, content=None):
         tweet_to_update = Tweet.query.filter_by(id=id).first()
         if source_id is not None:
             tweet_to_update.source_id = source_id
@@ -92,6 +95,8 @@ class Tweet(db.Model):
             tweet_to_update.source_name = source_name
         if author is not None:
             tweet_to_update.author = author
+        if display_name is not None:
+            tweet_to_update.display_name = display_name
         if title is not None:
             tweet_to_update.title = title
         if description is not None:

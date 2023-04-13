@@ -10,7 +10,8 @@ usernames = ['elonmusk', 'sama', 'ylecun', 'karpathy',
 @require_valid_user
 @admin_required
 def collect():
-    puller.run()
+    for username in usernames:
+        puller.run(usernames=[username])
     return jsonify({'message': 'Tweets collected'})
 
 

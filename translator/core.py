@@ -1,6 +1,8 @@
 import json
 import openai
 from config.translator import TranslatorConfig
+from utils.parser import find_first_index
+
 
 class TranslatorCore(object):
     ''' Translator class '''
@@ -24,6 +26,10 @@ class TranslatorCore(object):
         "word embedding", "pre-trained model", "pre-trained language model", "pre-trained transformer", "pre-trained BERT",
         "google", "facebook", "amazon", "microsoft", "apple", "ibm", "alibaba", "baidu", "tencent", "huawei",
     ]
+    title_keys = ['title', 'Title', 'TITLE', '标题',
+                  '题目', '摘要', '概要', '標題', '標題名稱', '標題名字']
+    content_keys = ['content', 'Content', 'CONTENT', '内容',
+                    '正文', '正文内容', '正文摘要', '正文概要', '內容', '內容摘要', '內容概要']
 
     def __init__(self, api_key=None):
         assert api_key is not None, 'API key is required'
@@ -51,6 +57,7 @@ class TranslatorCore(object):
         return False
 
     def generate_chinese_news_feed_post(self, author, text):
+        ''' Generate a Chinese news feed post '''
         response = openai.Completion.create(
             engine=self.config.translation_engine,
             prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped under 200 Chinese characters, remove all urls and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
@@ -62,24 +69,44 @@ class TranslatorCore(object):
 
         news_feed_post = response.choices[0].text.strip()
         print(news_feed_post)
-        try:
-            news_feed_post_json = json.loads(news_feed_post)
-            return self.parser(news_feed_post_json)
-        except json.decoder.JSONDecodeError:
+        return self.parse_response(news_feed_post)
+
+    def parse_response(self, response, count=0):
+        ''' Parse the response to title and content '''
+        if count > 1:
             return None, None
+        try:
+            response_json = json.loads(response)
+            return self.parse(response_json)
+        except json.decoder.JSONDecodeError:
+            response = self.jsonify(response)
+            return self.parse_response(response, count+1)
 
-    def parser(self, processed_json):
-        title_keys = ['title', 'Title', 'TITLE']
-        content_keys = ['content', 'Content', 'CONTENT']
+    def jsonify(self, raw_string):
+        ''' Parse the raw string to title and content '''
+        title_start_index = find_first_index(
+            raw_string, self.title_keys) + len("：")
+        title_end_index = raw_string.find("\n", title_start_index)
+        title = raw_string[title_start_index:title_end_index].rstrip(
+            ".,!?:;。！？：；").strip()
 
-        for key in title_keys:
+        content_start_index = find_first_index(
+            raw_string, self.content_keys) + len("：")
+        content = raw_string[content_start_index:].strip()
+
+        data = {"title": title, "content": content}
+        return json.dumps(data, ensure_ascii=False)
+
+    def parse(self, processed_json):
+        ''' Parse the json to title and content '''
+        for key in self.title_keys:
             if key in processed_json:
                 title = processed_json[key]
                 break
         else:
             title = None
 
-        for key in content_keys:
+        for key in self.content_keys:
             if key in processed_json:
                 content = processed_json[key]
                 break

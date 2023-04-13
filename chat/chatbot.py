@@ -91,7 +91,7 @@ class Chatbot:
             return format_results(results, html_mode=True)
         response = "Matching results:\n\n"
         for result in results:
-            response += f"Author: {result['author']}\nTweet URL: {result['url']}\nTweet Text: {result['title']}\nTranslated Text: {result['content']}\n\n"
+            response += f"Author: {result['author']}\nDisplayName: {result['displayname']}\nTweet URL: {result['url']}\nTweet Text: {result['title']}\nTranslated Text: {result['content']}\n\n"
         return response
 
     # Fetch the local CSV file
@@ -124,6 +124,7 @@ class Chatbot:
                     "id": row['id'],
                     "source": row['source'],
                     "author": row['author'],
+                    "displayname": row['displayname'],
                     "title": row['title'],
                     "description": row['description'],
                     "url": row['url'],
@@ -139,6 +140,7 @@ class Chatbot:
                         'name': row.source_name
                     },
                     "author": row.author,
+                    "displayname": row.display_name,
                     "title": row.title,
                     "description": row.description,
                     "url": row.url,

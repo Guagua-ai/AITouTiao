@@ -81,6 +81,7 @@ class Puller(object):
                             'name': "Twitter",
                         },
                         'author': tweet.user.username,
+                        "displayname": tweet.user.displayname,
                         'title': title,
                         'description': description,
                         'url': url,
@@ -136,13 +137,14 @@ class Puller(object):
                     source_id=tweet['source']['id'],
                     source_name=tweet['source']['name'],
                     author=tweet['author'],
+                    display_name=tweet['displayname'],
                     title=tweet['title'],
                     description=tweet['description'],
                     url=tweet['url'],
                     url_to_image=tweet['urlToImage'],
                     published_at=tweet['publishedAt'],
                     created_at=time.strftime('%Y-%m-%d %H:%M:%S'),
-                    content=tweet['content'],
+                    content='',
                 )
         session.add(new_tweet)
         try:
