@@ -1,5 +1,6 @@
 import os
 import time
+from db.storage import get_s3_client
 import models
 
 from app import app, redis_store
@@ -12,7 +13,7 @@ from sendgrid.helpers.mail import Mail as SendGridMail
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from modules.utlis import require_valid_user
 from search.index import create_user_search_index
-
+from werkzeug.utils import secure_filename
 
 @app.route('/auth/signup', methods=['POST'])
 def signup():
@@ -175,6 +176,31 @@ def delete_account():
         return jsonify({"message": "User account deleted successfully"}), 200
     else:
         return jsonify({"message": "User not found"}), 404
+
+
+@app.route('/auth/upload_profile', methods=['POST'])
+@require_valid_user
+def upload_profile():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file found'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    user = User.get_user_by_id(get_jwt_identity())
+    if user.profile_image != 'common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg' and user.profile_image.startswith('https://common-profile.s3.us-west-1.amazonaws.com'):
+        get_s3_client().delete_object(Bucket='common-profile', Key=user.profile_image.split('/')[-1])
+
+    file_path = secure_filename(file.filename)
+    get_s3_client().upload_fileobj(file, 'common-profile', file_path, ExtraArgs={'ACL': 'public-read'})
+    User.update_user(user.id, profile_image=f'https://common-profile.s3.us-west-1.amazonaws.com/{file_path}')
+
+    response = {
+        'message': 'File uploaded successfully',
+        'file_url': f'https://common-profile.s3.amazonaws.com/{file_path}'
+    }
+    return jsonify(response), 200
 
 
 @app.route('/auth/reset-password', methods=['POST'])
