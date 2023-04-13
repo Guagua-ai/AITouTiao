@@ -69,7 +69,7 @@ def tweets_pagination():
     return jsonify(response_packet)
 
 
-@app.route('/tweet/<int:tweet_id>', methods=['GET'])
+@app.route('/tweets/<int:tweet_id>', methods=['GET'])
 def get_tweet_by_id(tweet_id):
     tweet = Tweet.query.get(tweet_id)
     if tweet is not None:
