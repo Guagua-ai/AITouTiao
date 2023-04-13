@@ -1,5 +1,6 @@
 import json
 import openai
+from opencc import OpenCC
 from config.translator import TranslatorConfig
 from utils.parser import find_first_index
 
@@ -113,4 +114,10 @@ class TranslatorCore(object):
         else:
             content = None
 
-        return title, content
+        return self.purify_text(title), self.purify_text(content)
+
+    def purify_text(self, text):
+        ''' Purify the text to simplified Chinese '''
+        cc = OpenCC('t2s')  # t2s: Traditional to Simplified
+        simplified_text = cc.convert(text)
+        return simplified_text

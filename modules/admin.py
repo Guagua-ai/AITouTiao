@@ -1,3 +1,4 @@
+import os
 import requests
 from app import app
 from flask import jsonify
@@ -5,6 +6,7 @@ from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
 from modules.utlis import admin_required, require_valid_user
+from translator.core import TranslatorCore
 
 
 @app.route('/admin/promote/<int:user_id>', methods=['POST'])
@@ -79,3 +81,26 @@ def download_tweet_images():
             Tweet.update_tweet(tweet.id, url_to_image=object_url)
 
     return jsonify({'message': 'Images downloaded and uploaded successfully'}), 200
+
+
+@app.route('/admin/purify_tweets', methods=['PUT'])
+@require_valid_user
+@admin_required
+def purify_tweets():
+    """
+    Removes all tweets from the database.
+    """
+    tweets = Tweet.get_all_tweets()
+    with TranslatorCore(os.getenv('OPENAI_API_KEY')) as translator:
+        for tweet in tweets:
+            # Purify the tweet's title, description, and content
+            updated_title = translator.purify_text(tweet.title)
+            updated_description = translator.purify_text(tweet.description)
+            updated_content = translator.purify_text(tweet.content)
+            # Update the tweet's content field
+            Tweet.update_tweet(tweet.id,
+                               title=updated_title,
+                               description=updated_description,
+                               content=updated_content)
+
+    return jsonify({'message': 'Tweets purified successfully'}), 200
