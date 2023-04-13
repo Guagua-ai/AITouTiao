@@ -1,9 +1,13 @@
 from functools import wraps
 from urllib import request
+
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import app, chatbot
 from flask import request, jsonify
 
 from models.tweet import Tweet
+from models.user import User
+from models.view_history import ViewHistory
 from utils.time import standard_format
 
 
@@ -53,6 +57,7 @@ def tweets_pagination():
 
 
 @app.route('/tweets/<int:tweet_id>', methods=['GET'])
+@jwt_required(optional=True)
 def get_tweet_by_id(tweet_id):
     tweet = Tweet.query.get(tweet_id)
     if tweet is not None:
@@ -70,6 +75,9 @@ def get_tweet_by_id(tweet_id):
             "publishedAt": standard_format(tweet.published_at),
             "content": tweet.content
         }
+        if get_jwt_identity():
+            current_user = User.get_user_by_id(get_jwt_identity())
+            ViewHistory.add_to_view_history(current_user.id, tweet_id)
         return jsonify(tweet_data), 200
     else:
         return jsonify({'error': 'Tweet not found'}), 404

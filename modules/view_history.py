@@ -51,7 +51,7 @@ def get_view_history():
             'url': tweet.url,
             'url_to_image': tweet.url_to_image,
             'published_at': tweet.published_at,
-            'content': tweet.content
+            'content': '',
         } for tweet in tweets_from_view_history],
         "next_start_token": None
     }
