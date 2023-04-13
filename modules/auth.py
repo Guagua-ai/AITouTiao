@@ -76,11 +76,28 @@ def login():
     Returns a JWT token upon successful login.
     """
     data = request.json
+    if not data:
+        return jsonify({'message': 'Request body is empty'}), 400
+
+    if data.get('email') is None and data.get('phone') is None:
+        return jsonify({'message': 'Email or phone is required'}), 400
+
+    user = None
     email = data.get('email')
+    if email is not None:
+        user = User.get_user_by_email(email)
+
+    phone = data.get('phone')
+    if phone is not None:
+        user = User.get_user_by_phone(phone)
+
+    if user is None:
+        return jsonify({'message': 'Unable to find target user'}), 401
+
     password = data.get('password')
-    user = User.get_user_by_email(email)
     if not user or not user.check_password(password):
-        return jsonify({'message': 'Invalid email or password'}), 401
+        return jsonify({'message': 'Incorrect password'}), 401
+
     access_token = create_access_token(identity=user.id, additional_claims={
                                        "is_admin": user.is_admin()})
     refresh_token = create_refresh_token(identity=user.id)
@@ -90,6 +107,8 @@ def login():
             "id": user.id,
             "name": user.name,
             "email": user.email,
+            "phone": user.phone,
+            "profile_image": user.profile_image,
             "created_at": user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -122,7 +141,10 @@ def profile():
 
     return jsonify({
         'id': current_user.id,
-        'email': current_user.email,
+        'name': current_user.name,
+        "email": current_user.email,
+        "phone": current_user.phone,
+        "profile_image": current_user.profile_image,
         'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S')
     }), 200
 

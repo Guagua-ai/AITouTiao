@@ -12,7 +12,8 @@ class User(db.Model, UserMixin):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    email = Column(String(100), nullable=False, unique=True)
+    phone = Column(String(20), nullable=True, unique=True)
+    email = Column(String(100), nullable=True, unique=True)
     password_hash = Column(String(200), nullable=False)
     role = Column(String(50), nullable=False, default='user')
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -31,6 +32,8 @@ class User(db.Model, UserMixin):
             'id': self.id,
             'name': self.name,
             'email': self.email,
+            'phone': self.phone,
+            'role': self.role,
             'profile_image': self.profile_image,
         }
 
@@ -50,6 +53,9 @@ class User(db.Model, UserMixin):
     def get_user_by_id(id):
         return User.query.filter_by(id=id).first()
 
+    def get_user_by_phone(phone):
+        return User.query.filter_by(phone=phone).first()
+
     def get_user_by_email(email):
         return User.query.filter_by(email=email).first()
 
@@ -57,13 +63,13 @@ class User(db.Model, UserMixin):
         return User.query.filter_by(name=name).first()
 
     def get_all_users():
-        
         return User.query.all()
 
-    def create_user(name, email, password, role='user', quota=100, profile_image=None):
+    def create_user(name, password, email=None, phone=None, role='user', quota=100, profile_image=None):
         user = User(
             name=name,
             email=email,
+            phone=phone,
             password_hash=generate_password_hash(password),
             role=role,
             quota=quota)
@@ -73,7 +79,7 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return user
 
-    def update_user(id, name=None, email=None, password=None, profile_image=None, role=None, quota=None):
+    def update_user(id, name=None, email=None, phone=None, password=None, profile_image=None, role=None, quota=None):
         assert id, 'No id provided'
         user = User.query.filter_by(id=id).first()
 
@@ -82,6 +88,8 @@ class User(db.Model, UserMixin):
             user.name = name
         if email:
             user.email = email
+        if phone:
+            user.phone = phone
         if password:
             user.password = password
         if profile_image:
