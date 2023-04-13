@@ -29,32 +29,16 @@ def get_view_history():
 
     view_history = ViewHistory.get_view_history_by_user_id(current_user.id)
 
+    if start_token is None:
+        start_token = 0
     if since_id is not None:
-        # Filter view_history based on the since_id
-        view_history = [item for item in view_history if item.id > since_id]
+        start_token = since_id
 
-    # Paginate the view_history using the start_token
-    if start_token:
-        start_index = None
-        for i, item in enumerate(view_history):
-            if item.id == int(start_token):
-                start_index = i
-                break
-        if start_index is None:
-            # Invalid start_token, return empty response
-            return jsonify({
-                'status': 'ok',
-                'totalResults': 0,
-                'perPage': per_page,
-                'view_history': [],
-                'next_start_token': None
-            })
-        paginated_data = view_history[start_index + 1:start_index + 1 + per_page]
-    else:
-        paginated_data = view_history[:per_page]
+    # Paginate the tweet_data using the start_token
+    paginated_data = view_history[start_token: start_token + per_page]
 
-    tweets_from_view_history = Tweet.get_tweets_by_ids([item.post_id for item in paginated_data])
-
+    tweets_from_view_history = Tweet.get_tweets_by_ids(
+        [item.post_id for item in paginated_data])
     response_packet = {
         "status": "ok",
         "totalResults": len(view_history),
@@ -72,9 +56,9 @@ def get_view_history():
         "next_start_token": None
     }
 
-    # Add 'next_start_token' to the response_packet if there are more items available
-    if len(paginated_data) < len(view_history):
-        next_start_token = str(view_history[len(paginated_data)].id)
+    # Add 'next_start_token' to the response_packet if there are more tweets available
+    if start_token + per_page < len(view_history):
+        next_start_token = start_token + per_page
         response_packet['next_start_token'] = next_start_token
 
     return jsonify(response_packet)

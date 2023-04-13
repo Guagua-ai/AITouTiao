@@ -28,17 +28,6 @@ class Collection(db.Model):
             'last_accessed_at': self.last_accessed_at,
         }
 
-    def get_tweets(self, since_id=None, per_page=10, start_token=None):
-        from models.tweet import Tweet  # Import Tweet inside the method
-        query = Tweet.query.join(CollectionsTweets).filter_by(
-            collection_id=self.id).order_by(Tweet.published_at.desc())
-
-        if since_id:
-            query = query.filter(Tweet.id > since_id)
-
-        if start_token:
-            query = query.filter(Tweet.id <= start_token)
-
         return query.limit(per_page).all()
 
     def create_collection(user_id, name):

@@ -28,30 +28,13 @@ def tweets_pagination():
 
     tweet_data = chatbot.get_tweet_data()
 
+    if start_token is None:
+        start_token = 0
     if since_id is not None:
-        # Filter tweet_data based on the since_id
-        tweet_data = [tweet for tweet in tweet_data if int(
-            tweet['id']) > since_id]
+        start_token = since_id
 
     # Paginate the tweet_data using the start_token
-    if start_token:
-        start_index = None
-        for i, tweet in enumerate(tweet_data):
-            if tweet['id'] == int(start_token):
-                start_index = i
-                break
-        if start_index is None:
-            # Invalid start_token, return empty response
-            return jsonify({
-                'status': 'ok',
-                'totalResults': 0,
-                'perPage': per_page,
-                'articles': [],
-                'next_start_token': None
-            })
-        paginated_data = tweet_data[start_index + 1:start_index + 1 + per_page]
-    else:
-        paginated_data = tweet_data[:per_page]
+    paginated_data = tweet_data[start_token: start_token + per_page]
 
     response_packet = {
         "status": "ok",
@@ -62,8 +45,8 @@ def tweets_pagination():
     }
 
     # Add 'next_start_token' to the response_packet if there are more tweets available
-    if len(paginated_data) < len(tweet_data):
-        next_start_token = str(tweet_data[len(paginated_data)]['id'])
+    if start_token + per_page < len(tweet_data):
+        next_start_token = start_token + per_page
         response_packet['next_start_token'] = next_start_token
 
     return jsonify(response_packet)

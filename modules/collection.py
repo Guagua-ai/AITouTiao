@@ -63,32 +63,14 @@ def get_collections():
     start_token = request.args.get('start_token', default=None)
 
     collections = Collection.get_collections_by_user_id(current_user.id)
-    print('test collections: ')
-    print(collections)
 
+    if start_token is None:
+        start_token = 0
     if since_id is not None:
-        collections = [
-            collection for collection in collections if collection.id > since_id]
+        start_token = since_id
 
-    if start_token:
-        start_index = None
-        for i, collection in enumerate(collections):
-            if collection.id == int(start_token):
-                start_index = i
-                break
-        if start_index is None:
-            # Invalid start_token, return empty response
-            return jsonify({
-                'status': 'ok',
-                'totalResults': 0,
-                'perPage': per_page,
-                'collections': [],
-                'next_start_token': None
-            })
-        paginated_data = collections[start_index +
-                                     1:start_index + 1 + per_page]
-    else:
-        paginated_data = collections[:per_page]
+    # Paginate the tweet_data using the start_token
+    paginated_data = collections[start_token: start_token + per_page]
 
     response_packet = {
         "status": "ok",
@@ -102,12 +84,12 @@ def get_collections():
         "next_start_token": None
     }
 
-    # Add 'next_start_token' to the response_packet if there are more collections available
-    if len(paginated_data) < len(collections):
-        next_start_token = str(collections[len(paginated_data)].id)
+    # Add 'next_start_token' to the response_packet if there are more tweets available
+    if start_token + per_page < len(collections):
+        next_start_token = start_token + per_page
         response_packet['next_start_token'] = next_start_token
 
-    return jsonify(response_packet), 200
+    return jsonify(response_packet)
 
 
 @app.route('/collections/<int:collection_id>/tweets', methods=['GET'])
