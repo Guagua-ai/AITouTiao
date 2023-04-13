@@ -91,16 +91,16 @@ def purify_tweets():
     Removes all tweets from the database.
     """
     tweets = Tweet.get_all_tweets()
-    with TranslatorCore(os.getenv('OPENAI_API_KEY')) as translator:
-        for tweet in tweets:
-            # Purify the tweet's title, description, and content
-            updated_title = translator.purify_text(tweet.title)
-            updated_description = translator.purify_text(tweet.description)
-            updated_content = translator.purify_text(tweet.content)
-            # Update the tweet's content field
-            Tweet.update_tweet(tweet.id,
-                               title=updated_title,
-                               description=updated_description,
-                               content=updated_content)
+    translator = TranslatorCore(os.getenv('OPENAI_API_KEY'))
+    for tweet in tweets:
+        # Purify the tweet's title, description, and content
+        updated_title = translator.purify_text(tweet.title)
+        updated_description = translator.purify_text(tweet.description)
+        updated_content = translator.purify_text(tweet.content)
+        # Update the tweet's content field
+        Tweet.update_tweet(tweet.id,
+                            title=updated_title,
+                            description=updated_description,
+                            content=updated_content)
 
     return jsonify({'message': 'Tweets purified successfully'}), 200
