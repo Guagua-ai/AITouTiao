@@ -2,7 +2,7 @@ from io import BytesIO
 from PIL import Image
 import os
 import time
-from db.storage import get_s3_client, upload_image_to_s3
+from db.storage import delete_user_profile_image, get_s3_client, upload_image_to_s3
 import models
 
 from app import app, redis_store
@@ -186,8 +186,8 @@ def delete_account():
 
     if user:
         User.delete_user(user_id)  # Delete the user from the database
-        # Delete the user from the search index
-        create_user_search_index().delete_object(user_id)
+        create_user_search_index().delete_object(user_id)  # Delete the user from the search index
+        delete_user_profile_image(user.profile_image)
         return jsonify({"message": "User account deleted successfully"}), 200
     else:
         return jsonify({"message": "User not found"}), 404
@@ -211,6 +211,9 @@ def upload_profile():
         get_s3_client().delete_object(Bucket='common-profile',
                                       Key=user.profile_image.split('/')[-1])
 
+    delete_user_profile_image(user.profile_image)
+
+    # Get the file name and secure it
     file_path = secure_filename(file.filename)
 
     # Resize the image to ensure it's smaller than 2 MB

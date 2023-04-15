@@ -66,3 +66,33 @@ def download_image_from_s3(bucket_key, object_key):
     except ClientError as e:
         return None
     return response['Body'].read()
+
+
+def delete_user_profile_image(image_url):
+    """
+    Deletes a user's profile image from S3.
+    :param image_url: URL of the image
+    """
+    if not is_default_image(image_url) and not is_image_stored_in_s3(image_url):
+        return
+
+    get_s3_client().delete_object(
+        Bucket='common-profile', Key=image_url.split('/')[-1])
+
+
+def is_default_image(image_url):
+    """
+    Checks if a user's profile image is the default image.
+    :param image_url: URL of the image
+    :return: True if the image is the default image, else False
+    """
+    return image_url == 'common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg'
+
+
+def is_image_stored_in_s3(image_url):
+    """
+    Checks if a user's profile image is stored in S3.
+    :param image_url: URL of the image
+    :return: True if the image is stored in S3, else False
+    """
+    return image_url.startswith('https://common-profile.s3.us-west-1.amazonaws.com')

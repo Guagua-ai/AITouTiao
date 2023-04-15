@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from models.view_history import ViewHistory
 from models.collection import Collection
 from models.collection_tweet import CollectionsTweets
+from models.like import Like
 from models import db
 
 
@@ -27,6 +28,9 @@ class Tweet(db.Model):
 
     collections = relationship(
         'Collection', secondary='collections_tweets', back_populates='tweets')
+    likes = relationship('User', secondary='likes', lazy='subquery',
+                         backref=db.backref('liked_tweets', lazy=True))
+    num_likes = Column(Integer, default=0)
 
     # Alternatively, you can use this approach for multiple constraints
     __table_args__ = (UniqueConstraint('url'),)
@@ -48,6 +52,7 @@ class Tweet(db.Model):
             'published_at': self.published_at,
             'created_at': self.created_at,
             'content': self.content,
+            'num_likes': self.num_likes
         }
 
     def to_index_dict(self):
@@ -135,6 +140,15 @@ class Tweet(db.Model):
         tweets = Tweet.query.filter(Tweet.id.in_(db.session.query(
             ViewHistory.post_id).filter_by(user_id=user_id))).all()
         return tweets
+    
+    def like(self):
+        self.num_likes += 1
+        db.session.commit()
+
+    def unlike(self):
+        if self.num_likes > 0:
+            self.num_likes -= 1
+        db.session.commit()
 
 
 class TweetSchema(SQLAlchemyAutoSchema):
