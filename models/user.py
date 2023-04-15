@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import login_manager
 from models import db
+from sqlalchemy.orm import relationship
 
 
 class User(db.Model, UserMixin):
@@ -22,7 +23,8 @@ class User(db.Model, UserMixin):
     quota = Column(Integer, default=40)
     profile_image = Column(
         String(200), default='https://common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg')
-        
+    liked_tweets = relationship('Tweet', secondary='likes', lazy='subquery',
+                                 backref=db.backref('users_liked', lazy=True))
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -35,6 +37,10 @@ class User(db.Model, UserMixin):
             'phone': self.phone,
             'role': self.role,
             'profile_image': self.profile_image,
+            'quota': self.quota,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+            'likes': len(self.likes),
         }
 
     @login_manager.user_loader
@@ -91,7 +97,7 @@ class User(db.Model, UserMixin):
         if phone:
             user.phone = phone
         if password:
-            user.password = password
+            user.password = generate_password_hash(password)
         if profile_image:
             user.profile_image = profile_image
         if role:
@@ -106,6 +112,20 @@ class User(db.Model, UserMixin):
         db.session.delete(user)
         db.session.commit()
         return user
+    
+    def like_tweet(self, tweet):
+        self.liked_tweets.append(tweet)
+        db.session.commit()
+
+    def unlike_tweet(self, tweet):
+        self.liked_tweets.remove(tweet)
+        db.session.commit()
+
+    def is_liked(self, tweet):
+        return tweet in self.liked_tweets
+    
+    def get_liked_tweets(self):
+        return self.liked_tweets
 
 
 class UserSchema(SQLAlchemyAutoSchema):

@@ -163,3 +163,10 @@ jmespath==1.0.1
 s3transfer==0.6.0
 opencc-python-reimplemented==0.1.7
 pillow==9.5.0
+aniso8601==9.0.1
+flask-graphql==2.0.0
+graphene==3.2.2
+graphql-core==3.2.3
+graphql-relay==3.2.0
+graphql-server-core==1.1.1
+promise==2.3

@@ -1,13 +1,15 @@
 from functools import wraps
 from urllib import request
 
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import current_user, get_jwt_identity, jwt_required
 from app import app, chatbot
 from flask import request, jsonify
+import db
 
 from models.tweet import Tweet
 from models.user import User
 from models.view_history import ViewHistory
+from modules.utlis import require_valid_user
 from utils.time import standard_format
 
 
@@ -81,3 +83,28 @@ def get_tweet_by_id(tweet_id):
         return jsonify(tweet_data), 200
     else:
         return jsonify({'error': 'Tweet not found'}), 404
+    
+
+@app.route('/tweets/<int:tweet_id>/like', methods=['POST'])
+@require_valid_user
+def like_tweet(tweet_id):
+    """
+    Record a user's like for a tweet.
+    Expects a tweet ID parameter in the URL.
+    """
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    user = User.get_user_by_id(current_user.id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    if tweet in user.likes:
+        return jsonify({'message': 'User already liked this tweet'}), 400
+
+    user.likes.append(tweet)
+    db.session.commit()
+
+    return jsonify({'message': 'Like recorded successfully'}), 200
+    
