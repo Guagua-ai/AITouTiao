@@ -48,8 +48,8 @@ def signup():
         return jsonify({'message': 'Name must be less than 20 characters'}), 400
 
     user = User.create_user(name, email, password, profile_image=profile_image)
-    access_token = create_access_token(identity=user.id, additional_claims={
-                                       "is_admin": user.is_admin()})
+    access_token = create_access_token(identity=user.id,
+                                       additional_claims={"is_admin": user.is_admin()})
     refresh_token = create_refresh_token(identity=user.id)
 
     create_user_search_index().save_object({

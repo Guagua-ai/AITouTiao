@@ -61,7 +61,7 @@ def tweets_pagination():
 @app.route('/tweets/<int:tweet_id>', methods=['GET'])
 @jwt_required(optional=True)
 def get_tweet_by_id(tweet_id):
-    tweet = Tweet.query.get(tweet_id)
+    tweet = Tweet.get_tweet_by_id(tweet_id)
     if tweet is not None:
         tweet_data = {
             "id": tweet.id,

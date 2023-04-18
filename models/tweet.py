@@ -1,5 +1,4 @@
 import datetime
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, desc
 from sqlalchemy.orm import relationship
 from models.view_history import ViewHistory
@@ -78,15 +77,15 @@ class Tweet(db.Model):
         return Tweet.query.count()
 
     def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, published_at, content):
-        new_tweet = Tweet(source_id=source_id, 
-                          source_name=source_name, 
-                          author=author, 
+        new_tweet = Tweet(source_id=source_id,
+                          source_name=source_name,
+                          author=author,
                           display_name=display_name,
                           title=title,
-                          description=description, 
-                          url=url, 
-                          url_to_image=url_to_image, 
-                          published_at=published_at, 
+                          description=description,
+                          url=url,
+                          url_to_image=url_to_image,
+                          published_at=published_at,
                           created_at=datetime.now(),
                           content=content)
         db.session.add(new_tweet)
@@ -126,7 +125,7 @@ class Tweet(db.Model):
         tweets = Tweet.query.filter(Tweet.id.in_(db.session.query(
             ViewHistory.post_id).filter_by(user_id=user_id))).all()
         return tweets
-    
+
     def like(self):
         self.num_likes += 1
         db.session.commit()
@@ -135,8 +134,3 @@ class Tweet(db.Model):
         if self.num_likes > 0:
             self.num_likes -= 1
         db.session.commit()
-
-
-class TweetSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Tweet

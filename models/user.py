@@ -1,10 +1,10 @@
 from datetime import datetime
 from flask_login import UserMixin
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import Column, Integer, String, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import login_manager
 from models import db
+from models.like import Like
 from sqlalchemy.orm import relationship
 
 
@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
     profile_image = Column(
         String(200), default='https://common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg')
     liked_tweets = relationship('Tweet', secondary='likes', lazy='subquery',
-                                 backref=db.backref('users_liked', lazy=True))
+                                backref=db.backref('users_liked', lazy=True))
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -112,7 +112,7 @@ class User(db.Model, UserMixin):
         db.session.delete(user)
         db.session.commit()
         return user
-    
+
     def like_tweet(self, tweet):
         self.liked_tweets.append(tweet)
         db.session.commit()
@@ -123,11 +123,6 @@ class User(db.Model, UserMixin):
 
     def is_liked(self, tweet):
         return tweet in self.liked_tweets
-    
+
     def get_liked_tweets(self):
         return self.liked_tweets
-
-
-class UserSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
