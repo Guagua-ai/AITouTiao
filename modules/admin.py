@@ -1,7 +1,8 @@
+import datetime
 import os
 import requests
 from app import app
-from flask import jsonify
+from flask import jsonify, request
 from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
@@ -104,3 +105,42 @@ def purify_tweets():
                             content=updated_content)
 
     return jsonify({'message': 'Tweets purified successfully'}), 200
+
+
+@app.route('/tweets/<int:tweet_id>', methods=['PUT'])
+@admin_required
+def update_tweet(tweet_id):
+    """
+    Update a tweet's information by ID.
+    Expects a JSON payload with fields to update in the request body.
+    """
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'No data provided'}), 400
+
+    source_id = data.get('source_id').get('id')
+    source_name = data.get('source_name').get('name')
+    author = data.get('author')
+    title = data.get('title')
+    description = data.get('description')
+    url = data.get('url')
+    url_to_image = data.get('urlToImage')
+    published_at = data.get('publishedAt')
+    content = data.get('content')
+
+    tweet = Tweet.update_tweet(tweet_id,
+                               source_id=source_id,
+                               source_name=source_name,
+                               author=author,
+                               title=title,
+                               description=description,
+                               url=url,
+                               url_to_image=url_to_image,
+                               published_at=published_at,
+                               content=content)
+
+    return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
