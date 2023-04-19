@@ -110,6 +110,7 @@ class Tweet(db.Model):
         if content is not None:
             tweet_to_update.content = content
         db.session.commit()
+        return tweet_to_update
 
     def delete_tweet(id):
         tweet_to_delete = Tweet.query.filter_by(id=id).first()
