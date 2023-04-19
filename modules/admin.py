@@ -108,6 +108,7 @@ def purify_tweets():
 
 
 @app.route('/tweets/<int:tweet_id>', methods=['PUT'])
+@require_valid_user
 @admin_required
 def update_tweet(tweet_id):
     """
@@ -147,6 +148,7 @@ def update_tweet(tweet_id):
 
 
 @app.route('/tweets/<int:tweet_id>', methods=['DELETE'])
+@require_valid_user
 @admin_required
 def delete_tweet(tweet_id):
     """
