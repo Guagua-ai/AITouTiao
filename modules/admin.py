@@ -144,3 +144,17 @@ def update_tweet(tweet_id):
                                content=content)
 
     return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
+
+
+@app.route('/tweets/<int:tweet_id>', methods=['DELETE'])
+@admin_required
+def delete_tweet(tweet_id):
+    """
+    Delete a tweet by ID.
+    """
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    Tweet.delete_tweet(tweet_id)
+    return jsonify({'message': 'Tweet deleted successfully'}), 200
