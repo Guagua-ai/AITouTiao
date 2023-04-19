@@ -123,9 +123,10 @@ def update_tweet(tweet_id):
     if not data:
         return jsonify({'message': 'No data provided'}), 400
 
-    source_id = data.get('source_id').get('id')
-    source_name = data.get('source_name').get('name')
+    source_id = data.get('source_id')
+    source_name = data.get('source_name')
     author = data.get('author')
+    display_name = data.get('display_name')
     title = data.get('title')
     description = data.get('description')
     url = data.get('url')
@@ -137,6 +138,7 @@ def update_tweet(tweet_id):
                                source_id=source_id,
                                source_name=source_name,
                                author=author,
+                               display_name=display_name,
                                title=title,
                                description=description,
                                url=url,
