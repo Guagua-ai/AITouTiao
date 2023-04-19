@@ -144,7 +144,7 @@ class Puller(object):
                     url_to_image=tweet['urlToImage'],
                     published_at=tweet['publishedAt'],
                     created_at=time.strftime('%Y-%m-%d %H:%M:%S'),
-                    content='',
+            content=tweet['content'],
                 )
         session.add(new_tweet)
         try:
