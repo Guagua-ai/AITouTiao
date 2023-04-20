@@ -119,6 +119,12 @@ def login():
     }), 200
 
 
+@app.route('/auth/validate_token', methods=['GET'])
+@require_valid_user
+def validate_token():
+    return jsonify({'message': 'Token is valid'}), 200
+
+
 @app.route('/auth/logout', methods=['POST'])
 @require_valid_user
 def logout():
