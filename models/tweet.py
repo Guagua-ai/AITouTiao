@@ -50,6 +50,19 @@ class Tweet(db.Model):
             'content': self.content,
         }
 
+    def to_index_dict(self):
+        return {
+            "objectID": self.id,
+            "author": self.author,
+            "display_name": self.display_name,
+            "title": self.title,
+            "description": self.description,
+            "url": self.url,
+            "url_to_image": self.url_to_image,
+            "published_at": self.published_at,
+            "content": self.content,
+        }
+
     def get_all_tweets():
         return Tweet.query.order_by(Tweet.published_at.desc()).all()
 

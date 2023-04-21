@@ -16,6 +16,8 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from modules.utlis import require_valid_user
 from search.index import create_user_search_index
 from werkzeug.utils import secure_filename
+from utils.auth import is_valid_email
+
 
 @app.route('/auth/signup', methods=['POST'])
 def signup():
@@ -29,7 +31,10 @@ def signup():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+
     phone = None
+    if data.get('phone') is not None:
+        phone = data.get('phone')
 
     profile_image = None
     if data.get('profile_image') is not None:
@@ -37,6 +42,8 @@ def signup():
 
     if not email or not password:
         return jsonify({'message': 'Email and password are required'}), 400
+    if not is_valid_email(email):
+        return jsonify({'message': 'Email is invalid'}), 400
     if User.get_user_by_email(email):
         return jsonify({'message': 'Email already exists'}), 400
     if User.get_user_by_name(name):
@@ -54,11 +61,7 @@ def signup():
                                        "is_admin": user.is_admin()})
     refresh_token = create_refresh_token(identity=user.id)
 
-    create_user_search_index().save_object({
-        "objectID": user.id,
-        "name": user.name,
-        "email": user.email,
-    })
+    create_user_search_index().save_object(user.to_index_dict())
 
     return jsonify({
         'message': 'User created successfully',
@@ -183,7 +186,8 @@ def delete_account():
 
     if user:
         User.delete_user(user_id)  # Delete the user from the database
-        create_user_search_index().delete_object(user_id)  # Delete the user from the search index
+        # Delete the user from the search index
+        create_user_search_index().delete_object(user_id)
         return jsonify({"message": "User account deleted successfully"}), 200
     else:
         return jsonify({"message": "User not found"}), 404
@@ -198,13 +202,14 @@ def upload_profile():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
-    
+
     if file.content_length > 10 * 1024 * 1024:  # 10 MB max file size
         return jsonify({'error': 'File size exceeds the allowed limit'}), 400
 
     user = User.get_user_by_id(get_jwt_identity())
     if user.profile_image != 'common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg' and user.profile_image.startswith('https://common-profile.s3.us-west-1.amazonaws.com'):
-        get_s3_client().delete_object(Bucket='common-profile', Key=user.profile_image.split('/')[-1])
+        get_s3_client().delete_object(Bucket='common-profile',
+                                      Key=user.profile_image.split('/')[-1])
 
     file_path = secure_filename(file.filename)
 
@@ -214,7 +219,8 @@ def upload_profile():
 
     if not upload_image_to_s3('common-profile', file_path, resized_image_file):
         return jsonify({'error': 'Unable to upload file'}), 500
-    User.update_user(user.id, profile_image=f'https://common-profile.s3.us-west-1.amazonaws.com/{file_path}')
+    User.update_user(
+        user.id, profile_image=f'https://common-profile.s3.us-west-1.amazonaws.com/{file_path}')
 
     response = {
         'message': 'File uploaded successfully',

@@ -7,6 +7,7 @@ from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
 from modules.utlis import admin_required, require_valid_user
+from search.index import create_post_search_index, create_user_search_index
 from translator.core import TranslatorCore
 
 
@@ -32,6 +33,57 @@ def promote_user(user_id):
 
     User.update_user(user_id, is_admin=True)
     return jsonify({'message': 'User promoted successfully'}), 200
+
+
+@app.route('/admin/<int:user_id>', methods=['PUT'])
+@require_valid_user
+@admin_required
+def update_user(user_id):
+    """
+    Update a user's information.
+    Expects a user ID parameter in the URL.
+    """
+    if user_id == current_user.id:
+        return jsonify({'message': 'You cannot update yourself'}), 400
+    current_user = User.get_user_by_id(current_user.id)
+    if not current_user.is_admin:
+        return jsonify({'message': 'Admin required'}), 403
+
+    user = User.get_user_by_id(user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'No data provided'}), 400
+
+    user = User.update_user(user_id,
+                            name=data.get('name'),
+                            email=data.get('email'),
+                            phone=data.get('phone'),
+                            profile_image=data.get('profile_image'),
+                            role=data.get('role'),
+                            quota=data.get('quota'))
+
+    if data.get('email') or data.get('phone') or data.get('name'):
+        create_user_search_index().partial_update_object(user.to_index_dict())
+    return jsonify({'message': 'User updated successfully'}), 200
+
+
+@app.route('/admin/remove_user/<int:user_id>', methods=['DELETE'])
+@require_valid_user
+@admin_required
+def remove_user(user_id):
+    """
+    Remove a user by ID.
+    """
+    user = User.get_user_by_id(user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    User.delete_user(user_id)
+    create_user_search_index().delete_object(user.id)
+    return jsonify({'message': 'User deleted successfully'}), 200
 
 
 @app.route('/admin/download_tweet_images', methods=['POST'])
@@ -145,7 +197,8 @@ def update_tweet(tweet_id):
                                url_to_image=url_to_image,
                                published_at=published_at,
                                content=content)
-
+    if author or title or description or content or url or url_to_image or published_at:
+        create_post_search_index().save_object(tweet.to_index_dict())
     return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
 
 
@@ -161,4 +214,5 @@ def delete_tweet(tweet_id):
         return jsonify({'message': 'Tweet not found'}), 404
 
     Tweet.delete_tweet(tweet_id)
+    create_post_search_index().delete_object(tweet.id)
     return jsonify({'message': 'Tweet deleted successfully'}), 200

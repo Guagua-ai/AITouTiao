@@ -37,6 +37,13 @@ class User(db.Model, UserMixin):
             'profile_image': self.profile_image,
         }
 
+    def to_index_dict(self):
+        return {
+            "objectID": self.id,
+            "name": self.name,
+            "email": self.email,
+        }
+
     @login_manager.user_loader
     def load_user(user_id):
         return User(user_id)

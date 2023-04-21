@@ -198,7 +198,7 @@ class Puller(object):
             for tweet in all_tweets:
                 new_tweet = self.store_tweets_to_database(session, tweet)
                 # create search index
-                all_tweets_indices.append(Puller.create_search_index(new_tweet))
+                all_tweets_indices.append(new_tweet.to_index_dict())
             session.close()
 
         # save to algolia in batches
