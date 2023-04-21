@@ -1,5 +1,6 @@
 import datetime
 import os
+from flask_jwt_extended import get_jwt_identity
 import requests
 from app import app
 from flask import jsonify, request
@@ -21,6 +22,7 @@ def get_users():
     users = User.get_all_users()
     return jsonify({'users': [user.to_dict() for user in users]}), 200
 
+
 @app.route('/admin/user/promote/<int:user_id>', methods=['POST'])
 @require_valid_user
 @admin_required
@@ -29,11 +31,13 @@ def promote_user(user_id):
     Promote a user to admin.
     Expects a user ID parameter in the URL.
     """
-    if user_id == current_user.id:
-        return jsonify({'message': 'You cannot promote yourself'}), 400
-    current_user = User.get_user_by_id(current_user.id)
+    current_user = User.get_user_by_id(get_jwt_identity())
+    if not current_user:
+        return jsonify({'error': 'User not found'}), 404
     if not current_user.is_admin:
         return jsonify({'message': 'Admin required'}), 403
+    if user_id == current_user.id:
+        return jsonify({'message': 'You cannot promote yourself'}), 400
 
     user = User.get_user_by_id(user_id)
     if not user:
@@ -162,9 +166,9 @@ def purify_tweets():
         updated_content = translator.purify_text(tweet.content)
         # Update the tweet's content field
         Tweet.update_tweet(tweet.id,
-                            title=updated_title,
-                            description=updated_description,
-                            content=updated_content)
+                           title=updated_title,
+                           description=updated_description,
+                           content=updated_content)
 
     return jsonify({'message': 'Tweets purified successfully'}), 200
 
