@@ -229,12 +229,12 @@ def reindex_search():
     users = User.get_all_users()
     user_index = create_user_search_index()
     user_index.clear_objects()
-    user_index.add_objects([user.to_index_dict() for user in users])
+    user_index.save_objects([user.to_index_dict() for user in users])
 
     # Reindex tweets
     tweets = Tweet.get_all_tweets()
     tweet_index = create_post_search_index()
     tweet_index.clear_objects()
-    tweet_index.add_objects([tweet.to_index_dict() for tweet in tweets])
+    tweet_index.save_objects([tweet.to_index_dict() for tweet in tweets])
 
     return jsonify({'message': 'Search reindexed successfully'}), 200
