@@ -8,7 +8,6 @@ usernames = ['elonmusk', 'sama', 'ylecun', 'karpathy',
 
 
 @app.route('/admin/collect', methods=['GET'])
-@require_valid_user
 @admin_required
 def collect():
     for username in usernames:
@@ -17,7 +16,6 @@ def collect():
 
 
 @app.route('/admin/collect_async', methods=['GET'])
-@require_valid_user
 @admin_required
 def collect_async():
     jobs = []

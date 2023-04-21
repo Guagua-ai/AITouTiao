@@ -13,7 +13,6 @@ from translator.core import TranslatorCore
 
 
 @app.route('/admin/users', methods=['GET'])
-@require_valid_user
 @admin_required
 def get_users():
     """
@@ -24,7 +23,6 @@ def get_users():
 
 
 @app.route('/admin/user/promote/<int:user_id>', methods=['POST'])
-@require_valid_user
 @admin_required
 def promote_user(user_id):
     """
@@ -42,7 +40,6 @@ def promote_user(user_id):
 
 
 @app.route('/admin/user/<int:user_id>', methods=['PUT'])
-@require_valid_user
 @admin_required
 def update_user(user_id):
     """
@@ -71,7 +68,6 @@ def update_user(user_id):
 
 
 @app.route('/admin/user/<int:user_id>', methods=['DELETE'])
-@require_valid_user
 @admin_required
 def remove_user(user_id):
     """
@@ -87,7 +83,6 @@ def remove_user(user_id):
 
 
 @app.route('/admin/download_tweet_images', methods=['POST'])
-@require_valid_user
 @admin_required
 def download_tweet_images():
     """
@@ -137,7 +132,6 @@ def download_tweet_images():
 
 
 @app.route('/admin/purify_tweets', methods=['PUT'])
-@require_valid_user
 @admin_required
 def purify_tweets():
     """
@@ -160,7 +154,6 @@ def purify_tweets():
 
 
 @app.route('/admin/tweets/<int:tweet_id>', methods=['PUT'])
-@require_valid_user
 @admin_required
 def update_tweet(tweet_id):
     """
@@ -203,7 +196,6 @@ def update_tweet(tweet_id):
 
 
 @app.route('/admin/tweets/<int:tweet_id>', methods=['DELETE'])
-@require_valid_user
 @admin_required
 def delete_tweet(tweet_id):
     """
@@ -219,7 +211,6 @@ def delete_tweet(tweet_id):
 
 
 @app.route('/admin/search/reindex', methods=['POST'])
-@require_valid_user
 @admin_required
 def reindex_search():
     """

@@ -41,8 +41,17 @@ def require_valid_user(f):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        current_user = get_current_user()
-        if not current_user or not current_user.is_admin:
-            return jsonify({'message': 'Admin required'}), 403
+        verify_jwt_in_request()  # Check if a valid JWT token is provided
+        user_id = get_jwt_identity()  # Get the user ID from the JWT token
+
+        # Check if the user exists
+        current_user = User.query.filter_by(id=user_id).first()
+        if not current_user:
+            return jsonify({"message": "User not found"}), 404
+        
+        # Check if the user is admin
+        if not current_user.is_admin():
+            return jsonify({"message": "Admin required"}), 403
+
         return f(*args, **kwargs)
     return decorated_function
