@@ -45,7 +45,7 @@ def promote_user(user_id):
     if user.is_admin:
         return jsonify({'message': 'User is already an admin'}), 400
 
-    User.update_user(user_id, is_admin=True)
+    User.update_user(user_id, role='admin')
     return jsonify({'message': 'User promoted successfully'}), 200
 
 
