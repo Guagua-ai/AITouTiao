@@ -1,17 +1,8 @@
-import locale
 from datetime import datetime, timedelta
+from babel.dates import format_datetime
 
 
 def standard_format(published_at: datetime):
-    # Set the locale to Chinese (Simplified)
-    try:
-        locale.setlocale(locale.LC_TIME, 'zh_CN.utf8')
-    except locale.Error:
-        try:
-            locale.setlocale(locale.LC_TIME, 'zh_CN.UTF-8')
-        except locale.Error:
-            raise Exception("Chinese locale not supported on your system.")
-
     # Calculate time difference
     now = datetime.now()
     time_diff = now - published_at
@@ -25,6 +16,7 @@ def standard_format(published_at: datetime):
     elif days <= 7:
         return f"{days}天前"
     else:
-        # Format the datetime object to the desired format
-        published_at_formatted = published_at.strftime('%Y年%m月%d日')
+        # Format the datetime object using Babel
+        published_at_formatted = format_datetime(
+            published_at, "yyyy年MM月dd日 HH:mm:ss", locale='zh_CN')
         return published_at_formatted
