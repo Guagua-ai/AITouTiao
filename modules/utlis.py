@@ -2,6 +2,7 @@ from app import redis_store, jwt
 from functools import wraps
 from flask import jsonify
 from flask_jwt_extended import current_user, verify_jwt_in_request, get_jwt_identity
+from flask_jwt_extended import get_current_user
 from models.user import User
 
 
@@ -40,7 +41,8 @@ def require_valid_user(f):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_admin:
+        current_user = get_current_user()
+        if not current_user or not current_user.is_admin:
             return jsonify({'message': 'Admin required'}), 403
         return f(*args, **kwargs)
     return decorated_function
