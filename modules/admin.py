@@ -19,7 +19,7 @@ def get_users():
     Get all users.
     """
     users = User.get_all_users()
-    return jsonify({'users': users}), 200
+    return jsonify({'users': [user.to_dict() for user in users]}), 200
 
 @app.route('/admin/user/promote/<int:user_id>', methods=['POST'])
 @require_valid_user
