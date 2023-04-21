@@ -159,7 +159,7 @@ def purify_tweets():
     return jsonify({'message': 'Tweets purified successfully'}), 200
 
 
-@app.route('/tweets/<int:tweet_id>', methods=['PUT'])
+@app.route('/admin/tweets/<int:tweet_id>', methods=['PUT'])
 @require_valid_user
 @admin_required
 def update_tweet(tweet_id):
@@ -202,7 +202,7 @@ def update_tweet(tweet_id):
     return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
 
 
-@app.route('/tweets/<int:tweet_id>', methods=['DELETE'])
+@app.route('/admin/tweets/<int:tweet_id>', methods=['DELETE'])
 @require_valid_user
 @admin_required
 def delete_tweet(tweet_id):
@@ -216,3 +216,25 @@ def delete_tweet(tweet_id):
     Tweet.delete_tweet(tweet_id)
     create_post_search_index().delete_object(tweet.id)
     return jsonify({'message': 'Tweet deleted successfully'}), 200
+
+
+@app.route('/admin/search/reindex', methods=['POST'])
+@require_valid_user
+@admin_required
+def reindex_search():
+    """
+    Reindex all users and tweets.
+    """
+    # Reindex users
+    users = User.get_all_users()
+    user_index = create_user_search_index()
+    user_index.clear_index()
+    user_index.add_objects([user.to_index_dict() for user in users])
+
+    # Reindex tweets
+    tweets = Tweet.get_all_tweets()
+    tweet_index = create_post_search_index()
+    tweet_index.clear_index()
+    tweet_index.add_objects([tweet.to_index_dict() for tweet in tweets])
+
+    return jsonify({'message': 'Search reindexed successfully'}), 200
