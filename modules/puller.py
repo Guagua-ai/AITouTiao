@@ -6,7 +6,8 @@ from modules.utlis import admin_required, require_valid_user
 usernames = ['elonmusk', 'sama', 'ylecun', 'karpathy',
              'goodfellow_ian', 'demishassabis', 'OpenAI', 'DeepMind']
 
-@app.route('/collect', methods=['GET'])
+
+@app.route('/admin/collect', methods=['GET'])
 @require_valid_user
 @admin_required
 def collect():
@@ -15,7 +16,7 @@ def collect():
     return jsonify({'message': 'Tweets collected'})
 
 
-@app.route('/collect_async', methods=['GET'])
+@app.route('/admin/collect_async', methods=['GET'])
 @require_valid_user
 @admin_required
 def collect_async():

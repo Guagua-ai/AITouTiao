@@ -11,7 +11,7 @@ from search.index import create_post_search_index, create_user_search_index
 from translator.core import TranslatorCore
 
 
-@app.route('/admin/promote/<int:user_id>', methods=['POST'])
+@app.route('/admin/user/promote/<int:user_id>', methods=['POST'])
 @require_valid_user
 @admin_required
 def promote_user(user_id):
@@ -35,7 +35,7 @@ def promote_user(user_id):
     return jsonify({'message': 'User promoted successfully'}), 200
 
 
-@app.route('/admin/<int:user_id>', methods=['PUT'])
+@app.route('/admin/user/<int:user_id>', methods=['PUT'])
 @require_valid_user
 @admin_required
 def update_user(user_id):
@@ -70,7 +70,7 @@ def update_user(user_id):
     return jsonify({'message': 'User updated successfully'}), 200
 
 
-@app.route('/admin/remove_user/<int:user_id>', methods=['DELETE'])
+@app.route('/admin/user/<int:user_id>', methods=['DELETE'])
 @require_valid_user
 @admin_required
 def remove_user(user_id):
