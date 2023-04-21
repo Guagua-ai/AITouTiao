@@ -70,7 +70,7 @@ class User(db.Model, UserMixin):
         return User.query.filter_by(name=name).first()
 
     def get_all_users():
-        return User.query.all()
+        return User.query.order_by(User.id.desc()).all()
 
     def create_user(name, password, email=None, phone=None, role='user', quota=100, profile_image=None):
         user = User(
