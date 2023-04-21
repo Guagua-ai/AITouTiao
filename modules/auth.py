@@ -29,6 +29,7 @@ def signup():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+    phone = None
 
     profile_image = None
     if data.get('profile_image') is not None:
@@ -47,7 +48,8 @@ def signup():
     if len(name) > 20:
         return jsonify({'message': 'Name must be less than 20 characters'}), 400
 
-    user = User.create_user(name, email, password, profile_image=profile_image)
+    user = User.create_user(name=name, password=password,
+                            email=email, phone=phone, profile_image=profile_image)
     access_token = create_access_token(identity=user.id, additional_claims={
                                        "is_admin": user.is_admin()})
     refresh_token = create_refresh_token(identity=user.id)
