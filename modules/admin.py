@@ -42,7 +42,7 @@ def promote_user(user_id):
     user = User.get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found'}), 404
-    if user.is_admin:
+    if user.is_admin():
         return jsonify({'message': 'User is already an admin'}), 400
 
     User.update_user(user_id, role='admin')
