@@ -64,6 +64,7 @@ def signup():
             "id": user.id,
             "name": user.name,
             "email": user.email,
+            "profile_image": user.profile_image,
             "created_at": user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             "access_token": access_token,
             "refresh_token": refresh_token,
