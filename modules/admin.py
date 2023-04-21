@@ -31,14 +31,6 @@ def promote_user(user_id):
     Promote a user to admin.
     Expects a user ID parameter in the URL.
     """
-    current_user = User.get_user_by_id(get_jwt_identity())
-    if not current_user:
-        return jsonify({'error': 'User not found'}), 404
-    if not current_user.is_admin:
-        return jsonify({'message': 'Admin required'}), 403
-    if user_id == current_user.id:
-        return jsonify({'message': 'You cannot promote yourself'}), 400
-
     user = User.get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found'}), 404
@@ -57,12 +49,6 @@ def update_user(user_id):
     Update a user's information.
     Expects a user ID parameter in the URL.
     """
-    if user_id == current_user.id:
-        return jsonify({'message': 'You cannot update yourself'}), 400
-    current_user = User.get_user_by_id(current_user.id)
-    if not current_user.is_admin:
-        return jsonify({'message': 'Admin required'}), 403
-
     user = User.get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found'}), 404
