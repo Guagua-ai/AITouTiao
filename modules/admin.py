@@ -11,6 +11,16 @@ from search.index import create_post_search_index, create_user_search_index
 from translator.core import TranslatorCore
 
 
+@app.route('/admin/users', methods=['GET'])
+@require_valid_user
+@admin_required
+def get_users():
+    """
+    Get all users.
+    """
+    users = User.get_all_users()
+    return jsonify({'users': users}), 200
+
 @app.route('/admin/user/promote/<int:user_id>', methods=['POST'])
 @require_valid_user
 @admin_required
