@@ -59,6 +59,7 @@ def signup():
                             email=email, phone=phone, profile_image=profile_image)
     access_token = create_access_token(identity=user.id, additional_claims={
                                        "is_admin": user.is_admin()})
+
     refresh_token = create_refresh_token(identity=user.id)
 
     create_user_search_index().save_object(user.to_index_dict())
