@@ -61,7 +61,7 @@ class TranslatorCore(object):
         ''' Generate a Chinese news feed post '''
         response = openai.Completion.create(
             engine=self.config.translation_engine,
-            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped under 600 Chinese characters, remove all urls and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
+            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped under 600 Chinese characters, remove all urls and don't translate human names) for tweet from '{author}': '{text}'. Response must be a json with three fields. First field is title, second field is content, and third field is image_description.",
             max_tokens=self.config.translation_max_tokens,
             n=self.config.translation_n,
             stop=None,
@@ -73,9 +73,9 @@ class TranslatorCore(object):
         return self.parse_response(news_feed_post)
 
     def parse_response(self, response, count=0):
-        ''' Parse the response to title and content '''
+        ''' Parse the response to title, content, and image_description '''
         if count > 1:
-            return None, None
+            return None, None, None
         try:
             response_json = json.loads(response)
             return self.parse(response_json)
@@ -99,7 +99,7 @@ class TranslatorCore(object):
         return json.dumps(data, ensure_ascii=False)
 
     def parse(self, processed_json):
-        ''' Parse the json to title and content '''
+        ''' Parse the json to title, content, and image_description '''
         for key in self.title_keys:
             if key in processed_json:
                 title = processed_json[key]
@@ -114,7 +114,9 @@ class TranslatorCore(object):
         else:
             content = None
 
-        return self.purify_text(title), self.purify_text(content)
+        image_description = processed_json.get('image_description', None)
+
+        return self.purify_text(title), self.purify_text(content), self.purify_text(image_description)
 
     def purify_text(self, text):
         ''' Purify the text to simplified Chinese '''

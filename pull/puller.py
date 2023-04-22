@@ -64,7 +64,7 @@ class Puller(object):
                     if not self.translator.is_related_to_ai(tweet.rawContent):
                         continue
                     # generate chinese news feed post
-                    title, content = self.translator.generate_chinese_news_feed_post(
+                    title, content, image_description = self.translator.generate_chinese_news_feed_post(
                         tweet.user.displayname,
                         tweet.rawContent)
                     if not title or not content:
@@ -73,6 +73,9 @@ class Puller(object):
                     description = content
                     if len(content) > 40:
                         description = content[:40] + '...'
+
+                    # print image_description
+                    print(image_description)
 
                     url_to_image = self.process_image(tweet, image_set)
                     formatted_tweet = {
