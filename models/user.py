@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
     quota = Column(Integer, default=40)
     profile_image = Column(
         String(200), default='https://common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg')
-    liked_tweets = relationship('Tweet', secondary='likes', lazy='subquery')
+    liked_tweets = relationship('Tweet', secondary='likes', back_populates='tweets', lazy = 'subquery')
 
 
     def __repr__(self):
