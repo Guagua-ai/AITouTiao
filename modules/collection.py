@@ -108,8 +108,33 @@ def get_tweets_from_collection(collection_id):
     if not collection:
         return jsonify({'error': f'Collection with ID {collection_id} not found'}), 404
 
-    tweets = collection.get_tweets(
-        since_id=since_id, per_page=per_page, start_token=start_token)
+    # Get the tweets from the collection
+    tweets = collection.get_tweets()
+
+    if start_token is None:
+        start_token = 0
+    if since_id is not None:
+        start_token = since_id
+
+    # Paginate the tweet_data using the start_token
+    paginated_data = tweets[start_token: start_token + per_page]
+
+    response_packet = {
+        "status": "ok",
+        "totalResults": len(tweets),
+        "perPage": per_page,
+        "collections": [{
+            'id': collection.id,
+            'name': collection.name,
+            'created_at': collection.created_at
+        } for collection in paginated_data],
+        "next_start_token": None
+    }
+
+    # Add 'next_start_token' to the response_packet if there are more tweets available
+    if start_token + per_page < len(tweets):
+        next_start_token = start_token + per_page
+        response_packet['next_start_token'] = next_start_token
 
     return jsonify([{
         'id': tweet.id,

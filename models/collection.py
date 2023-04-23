@@ -28,8 +28,6 @@ class Collection(db.Model):
             'last_accessed_at': self.last_accessed_at,
         }
 
-        return query.limit(per_page).all()
-
     def create_collection(user_id, name):
         collection = Collection(name=name, user_id=user_id)
         db.session.add(collection)
@@ -52,6 +50,9 @@ class Collection(db.Model):
         collection.last_accessed_at = datetime.utcnow()
         db.session.commit()
         return collection
+
+    def get_tweets(self):
+        return self.tweets.filter(CollectionsTweets.collection_id == self.id).all()
 
     def add_tweet(self, tweet):
         if tweet in self.tweets:
