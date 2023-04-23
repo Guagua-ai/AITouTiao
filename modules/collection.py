@@ -45,7 +45,7 @@ def add_tweet_to_collection(collection_id):
         return jsonify({'error': f'Tweet with ID {tweet_id} not found'}), 404
 
     try:
-        collection.add_tweet(tweet)
+        collection.add_tweet_to_collection(tweet.id)
         return jsonify({'collection_id': collection.id, 'tweet_id': tweet.id}), 201
     except ValueError as e:
         return jsonify({'error': str(e)}), 400

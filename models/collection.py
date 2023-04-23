@@ -54,6 +54,14 @@ class Collection(db.Model):
         db.session.commit()
         return collection
 
+    def add_tweet_to_collection(self, tweet_id):
+        from models.tweet import Tweet
+        tweet = Tweet.get_tweet_by_id(tweet_id)
+        if tweet is None:
+            return None
+        self.tweets.append(tweet)
+        db.session.commit()
+        return tweet
 
     def get_tweets(self):
         from models.tweet import Tweet
