@@ -6,6 +6,8 @@ from models.tweet import Tweet
 from modules.utlis import require_valid_user
 from flask_jwt_extended import get_jwt_identity
 
+from utils.time import standard_format
+
 
 @app.route('/collections', methods=['POST'])
 @require_valid_user
@@ -45,7 +47,7 @@ def add_tweet_to_collection(collection_id):
         return jsonify({'error': f'Tweet with ID {tweet_id} not found'}), 404
 
     try:
-        collection.add_tweet(tweet)
+        collection.add_tweet_to_collection(tweet.id)
         return jsonify({'collection_id': collection.id, 'tweet_id': tweet.id}), 201
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
@@ -123,11 +125,20 @@ def get_tweets_from_collection(collection_id):
         "status": "ok",
         "totalResults": len(tweets),
         "perPage": per_page,
-        "collections": [{
-            'id': collection.id,
-            'name': collection.name,
-            'created_at': collection.created_at
-        } for collection in paginated_data],
+        "tweets": [{
+            "id": tweet.id,
+            "source": {
+                'id': tweet.source_id,
+                'name': tweet.source_name
+            },
+            "author": tweet.author,
+            "title": tweet.title,
+            "description": tweet.description,
+            "url": tweet.url,
+            "urlToImage": tweet.url_to_image,
+            "publishedAt": standard_format(tweet.published_at),
+            "content": tweet.content
+        } for tweet in paginated_data],
         "next_start_token": None
     }
 

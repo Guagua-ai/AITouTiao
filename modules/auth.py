@@ -7,6 +7,7 @@ import models
 
 from app import app, redis_store
 from urllib import request
+from models.collection import Collection
 from models.user import User
 from flask import request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt, get_jwt_identity
@@ -57,6 +58,7 @@ def signup():
 
     user = User.create_user(name=name, password=password,
                             email=email, phone=phone, profile_image=profile_image)
+    Collection.create_collection(user_id=user.id, name='Favorites')
     access_token = create_access_token(identity=user.id, additional_claims={
                                        "is_admin": user.is_admin()})
 

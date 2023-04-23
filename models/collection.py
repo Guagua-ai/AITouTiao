@@ -2,7 +2,6 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, desc
 from sqlalchemy.orm import relationship
 from models import db
-from models.collection_tweet import CollectionsTweets
 
 
 class Collection(db.Model):
@@ -14,7 +13,7 @@ class Collection(db.Model):
     created_at = Column(DateTime, default=datetime.utcnow)
     last_accessed_at = Column(DateTime, default=datetime.utcnow)
     tweets = relationship(
-        'Tweet', secondary='collections_tweets', back_populates='collections')
+        'Tweet', secondary='collections_tweets', lazy='dynamic', back_populates='collections')
 
     def __repr__(self):
         return f'<Collection {self.name}>'
@@ -37,6 +36,8 @@ class Collection(db.Model):
     def get_collection_by_id(id):
         # update last_accessed_at
         collection = Collection.query.filter_by(id=id).first()
+        if collection is None:
+            return None
         collection.last_accessed_at = datetime.utcnow()
         db.session.commit()
         return collection
@@ -47,25 +48,21 @@ class Collection(db.Model):
     def get_collection_by_id_and_user_id(id, user_id):
         # update last_accessed_at
         collection = Collection.query.filter_by(id=id, user_id=user_id).first()
+        if collection is None:
+            return None
         collection.last_accessed_at = datetime.utcnow()
         db.session.commit()
         return collection
 
-    def get_tweets(self):
-        return self.tweets.filter(CollectionsTweets.collection_id == self.id).all()
-
-    def add_tweet(self, tweet):
-        if tweet in self.tweets:
-            raise ValueError('Tweet is already in collection')
-        # update last_accessed_at
-        self.last_accessed_at = datetime.utcnow()
+    def add_tweet_to_collection(self, tweet_id):
+        from models.tweet import Tweet
+        tweet = Tweet.get_tweet_by_id(tweet_id)
+        if tweet is None:
+            return None
         self.tweets.append(tweet)
         db.session.commit()
+        return tweet
 
-    def remove_tweet(self, tweet):
-        if tweet not in self.tweets:
-            raise ValueError('Tweet is not in collection')
-        # update last_accessed_at
-        self.last_accessed_at = datetime.utcnow()
-        self.tweets.remove(tweet)
-        db.session.commit()
+    def get_tweets(self):
+        from models.tweet import Tweet
+        return Tweet.query.filter(Tweet.collections.contains(self)).all()
