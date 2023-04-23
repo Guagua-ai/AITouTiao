@@ -36,6 +36,8 @@ class Collection(db.Model):
     def get_collection_by_id(id):
         # update last_accessed_at
         collection = Collection.query.filter_by(id=id).first()
+        if collection is None:
+            return None
         collection.last_accessed_at = datetime.utcnow()
         db.session.commit()
         return collection
@@ -51,6 +53,7 @@ class Collection(db.Model):
         collection.last_accessed_at = datetime.utcnow()
         db.session.commit()
         return collection
+
 
     def get_tweets(self):
         from models.tweet import Tweet
