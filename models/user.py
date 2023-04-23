@@ -4,8 +4,9 @@ from sqlalchemy import Column, Integer, String, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import login_manager
 from models import db
-from models.like import Like
 from sqlalchemy.orm import relationship
+from models.like import Like
+from models.tweet import Tweet
 
 
 class User(db.Model, UserMixin):
@@ -23,8 +24,8 @@ class User(db.Model, UserMixin):
     quota = Column(Integer, default=40)
     profile_image = Column(
         String(200), default='https://common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg')
-    liked_tweets = relationship('Tweet', secondary='likes', lazy='subquery',
-                                backref=db.backref('users_liked', lazy=True))
+    liked_tweets = relationship('Tweet', secondary='likes', lazy='subquery')
+
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -40,7 +41,7 @@ class User(db.Model, UserMixin):
             'quota': self.quota,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
-            'likes': len(self.likes),
+            'likes': len(self.liked_tweets),
         }
 
     def to_index_dict(self):
