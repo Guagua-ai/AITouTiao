@@ -164,3 +164,4 @@ s3transfer==0.6.0
 opencc-python-reimplemented==0.1.7
 pillow==9.5.0
 babel==2.12.1
+aniso8601==9.0.1

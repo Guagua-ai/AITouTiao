@@ -1,10 +1,10 @@
 import datetime
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, desc
 from sqlalchemy.orm import relationship
 from models.view_history import ViewHistory
 from models.collection import Collection
 from models.collection_tweet import CollectionsTweets
+from models.like import Like
 from models import db
 
 
@@ -27,6 +27,9 @@ class Tweet(db.Model):
 
     collections = relationship(
         'Collection', secondary='collections_tweets', back_populates='tweets')
+    likes = relationship('Like', back_populates='tweet',
+                         lazy='subquery', cascade='all, delete-orphan')
+    num_likes = Column(Integer, default=0)
 
     # Alternatively, you can use this approach for multiple constraints
     __table_args__ = (UniqueConstraint('url'),)
@@ -48,6 +51,7 @@ class Tweet(db.Model):
             'published_at': self.published_at,
             'created_at': self.created_at,
             'content': self.content,
+            'num_likes': self.num_likes
         }
 
     def to_index_dict(self):
@@ -86,15 +90,15 @@ class Tweet(db.Model):
         return Tweet.query.count()
 
     def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, published_at, content):
-        new_tweet = Tweet(source_id=source_id, 
-                          source_name=source_name, 
-                          author=author, 
+        new_tweet = Tweet(source_id=source_id,
+                          source_name=source_name,
+                          author=author,
                           display_name=display_name,
                           title=title,
-                          description=description, 
-                          url=url, 
-                          url_to_image=url_to_image, 
-                          published_at=published_at, 
+                          description=description,
+                          url=url,
+                          url_to_image=url_to_image,
+                          published_at=published_at,
                           created_at=datetime.now(),
                           content=content)
         db.session.add(new_tweet)
@@ -136,7 +140,11 @@ class Tweet(db.Model):
             ViewHistory.post_id).filter_by(user_id=user_id))).all()
         return tweets
 
+    def like(self):
+        self.num_likes += 1
+        db.session.commit()
 
-class TweetSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Tweet
+    def unlike(self):
+        if self.num_likes > 0:
+            self.num_likes -= 1
+        db.session.commit()
