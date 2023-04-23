@@ -1,10 +1,9 @@
-from io import BytesIO
-from PIL import Image
 import os
 import time
-from db.storage import delete_user_profile_image, get_s3_client, upload_image_to_s3
 import models
 
+from io import BytesIO
+from PIL import Image
 from app import app, redis_store
 from urllib import request
 from models.collection import Collection
@@ -18,6 +17,7 @@ from modules.utlis import require_valid_user
 from search.index import create_user_search_index
 from werkzeug.utils import secure_filename
 from utils.auth import is_valid_email
+from db.storage import delete_user_profile_image, get_s3_client, upload_image_to_s3
 
 
 @app.route('/auth/signup', methods=['POST'])

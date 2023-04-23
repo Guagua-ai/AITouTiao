@@ -27,6 +27,8 @@ class Tweet(db.Model):
 
     collections = relationship(
         'Collection', secondary='collections_tweets', back_populates='tweets')
+    likes = relationship('Like', back_populates='tweet',
+                         lazy='subquery', cascade='all, delete-orphan')
     num_likes = Column(Integer, default=0)
 
     # Alternatively, you can use this approach for multiple constraints
