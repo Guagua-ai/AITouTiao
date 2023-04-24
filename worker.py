@@ -4,6 +4,7 @@ from redis import Redis
 from rq import Worker, Queue, Connection
 from dotenv import load_dotenv
 from db import db
+from models.user import User
 
 # Load environment variables
 load_dotenv('.env')
