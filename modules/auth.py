@@ -207,11 +207,11 @@ def upload_profile():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
 
-    if file.content_length > 10 * 1024 * 1024:  # 10 MB max file size
+    if file.content_length > 30 * 1024 * 1024:  # 30 MB max file size
         return jsonify({'error': 'File size exceeds the allowed limit'}), 400
 
     user = User.get_user_by_id(get_jwt_identity())
-    if user.profile_image != 'common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg' and user.profile_image.startswith('https://common-profile.s3.us-west-1.amazonaws.com'):
+    if user.profile_image != 'https://common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg' and user.profile_image.startswith('https://common-profile.s3.us-west-1.amazonaws.com'):
         get_s3_client().delete_object(Bucket='common-profile',
                                       Key=user.profile_image.split('/')[-1])
 
