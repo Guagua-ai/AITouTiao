@@ -86,7 +86,7 @@ def is_default_image(image_url):
     :param image_url: URL of the image
     :return: True if the image is the default image, else False
     """
-    return image_url == 'common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg'
+    return image_url == 'https://common-profile.s3.us-west-1.amazonaws.com/profile_boy200.jpg'
 
 
 def is_image_stored_in_s3(image_url):
