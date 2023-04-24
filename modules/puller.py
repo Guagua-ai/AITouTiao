@@ -1,7 +1,7 @@
 from app import app, puller, q
 from flask import jsonify
 from steps import PullStep
-from modules.utlis import admin_required, require_valid_user
+from modules.utils import admin_required, require_valid_user
 
 usernames = ['elonmusk', 'sama', 'ylecun', 'karpathy',
              'goodfellow_ian', 'demishassabis', 'OpenAI', 'DeepMind']

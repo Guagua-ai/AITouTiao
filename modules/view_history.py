@@ -3,7 +3,7 @@ from app import app
 from models.user import User
 from models.tweet import Tweet
 from models.view_history import ViewHistory
-from modules.utlis import require_valid_user
+from modules.utils import require_valid_user
 from flask_jwt_extended import get_jwt_identity
 
 

@@ -13,7 +13,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SendGridMail
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from modules.utlis import require_valid_user
+from modules.utils import require_valid_user
 from search.index import create_user_search_index
 from werkzeug.utils import secure_filename
 from utils.auth import is_valid_email
