@@ -159,7 +159,10 @@ def get_all_tweets():
     Get all tweets.
     """
     tweets = Tweet.get_all_tweets()
-    return jsonify([{
+
+    response_packet = {
+        "totalResults": len(tweets),
+        "articles": [{
             "id": tweet.id,
             "source": {
                 'id': tweet.source_id,
@@ -173,7 +176,10 @@ def get_all_tweets():
             "publishedAt": standard_format(tweet.published_at),
             "content": tweet.content,
             "likes": tweet.num_likes,
-        } for tweet in tweets]), 200
+        } for tweet in tweets]
+    }
+
+    return jsonify(response_packet), 200
 
 
 @app.route('/admin/tweets/<int:tweet_id>', methods=['PUT'])
