@@ -130,7 +130,8 @@ class Chatbot:
                     "url": row['url'],
                     "urlToImage": row['urlToImage'],
                     "publishedAt": row['publishedAt'],
-                    "content": row['content']
+                    "content": row['content'],
+                    "likes": 0,
                 })
             else:
                 tweet_data.append({
@@ -146,7 +147,8 @@ class Chatbot:
                     "url": row.url,
                     "urlToImage": row.url_to_image,
                     "publishedAt": standard_format(row.published_at),
-                    "content": row.content
+                    "content": '',
+                    "likes": row.num_likes,
                 })
 
         return tweet_data

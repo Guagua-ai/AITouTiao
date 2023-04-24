@@ -5,6 +5,7 @@ from flask_jwt_extended import current_user, get_jwt_identity, jwt_required
 from app import app, chatbot
 from flask import request, jsonify
 import db
+from models.like import Like
 
 from models.tweet import Tweet
 from models.user import User
@@ -75,7 +76,8 @@ def get_tweet_by_id(tweet_id):
             "url": tweet.url,
             "urlToImage": tweet.url_to_image,
             "publishedAt": standard_format(tweet.published_at),
-            "content": tweet.content
+            "content": tweet.content,
+            "likes": tweet.num_likes,
         }
         if get_jwt_identity():
             current_user = User.get_user_by_id(get_jwt_identity())
@@ -96,14 +98,72 @@ def like_tweet(tweet_id):
     if not tweet:
         return jsonify({'message': 'Tweet not found'}), 404
 
-    user = User.get_user_by_id(current_user.id)
-    if not user:
+    current_user = User.get_user_by_id(get_jwt_identity())
+    if not current_user:
         return jsonify({'message': 'User not found'}), 404
 
-    if tweet in user.likes:
+    like = Like.get_like_by_user_id_and_tweet_id(
+        user_id=current_user.id, tweet_id=tweet.id)
+    if like:
         return jsonify({'message': 'User already liked this tweet'}), 400
 
-    user.likes.append(tweet)
-    db.session.commit()
+    like = Like.create_like(user_id=current_user.id, tweet_id=tweet.id)
+    tweet.add_like(like)
 
     return jsonify({'message': 'Like recorded successfully'}), 200
+
+
+@app.route('/tweets/<int:tweet_id>/likes', methods=['GET'])
+def get_likes_for_tweet(tweet_id):
+    """
+    Get all the likes for a tweet.
+    Expects a tweet ID parameter in the URL.
+    """
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    likes = tweet.get_likes()
+    if not likes:
+        return jsonify({'message': 'No likes found'}), 404
+
+    likes_data = []
+    for like in likes:
+        user = User.get_user_by_id(like.user_id)
+        likes_data.append({
+            'id': like.id,
+            'user_id': user.id,
+            'name': user.name,
+            'profile_image_url': user.profile_image
+        })
+
+    like_count = tweet.like_count()
+    print(like_count)
+    return jsonify({'likes': likes_data, 'like_count': like_count}), 200
+
+
+@app.route('/tweets/<int:tweet_id>/unlike', methods=['POST'])
+@require_valid_user
+def unlike_tweet(tweet_id):
+    """
+    Remove a user's like for a tweet.
+    Expects a tweet ID parameter in the URL.
+    """
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    current_user = User.get_user_by_id(get_jwt_identity())
+    if not current_user:
+        return jsonify({'message': 'User not found'}), 404
+
+    like = Like.get_like_by_user_id_and_tweet_id(
+        user_id=current_user.id, tweet_id=tweet.id)
+    if like is None:
+        return jsonify({'message': 'User did not like this tweet'}), 400
+
+    deleted_like = Like.unlike_by_id(like.id)
+    tweet.remove_like(deleted_like)
+    if not deleted_like:
+        return jsonify({'message': 'Error deleting like'}), 500
+    return jsonify({'message': 'Like deleted successfully'}), 200
