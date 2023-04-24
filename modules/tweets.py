@@ -1,12 +1,8 @@
-from functools import wraps
 from urllib import request
-
-from flask_jwt_extended import current_user, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import app, chatbot
 from flask import request, jsonify
-import db
 from models.like import Like
-
 from models.tweet import Tweet
 from models.user import User
 from models.view_history import ViewHistory
@@ -19,12 +15,11 @@ def tweets():
     tweet_data = chatbot.get_tweet_data()
 
     response_packet = {
-        "status": "ok",
         "totalResults": len(tweet_data),
         "articles": tweet_data
     }
 
-    return jsonify(response_packet)
+    return jsonify(response_packet), 200
 
 
 @app.route('/tweets/pagination', methods=['GET'])
@@ -56,7 +51,7 @@ def tweets_pagination():
         next_start_token = start_token + per_page
         response_packet['next_start_token'] = next_start_token
 
-    return jsonify(response_packet)
+    return jsonify(response_packet), 200
 
 
 @app.route('/tweets/<int:tweet_id>', methods=['GET'])
@@ -85,7 +80,7 @@ def get_tweet_by_id(tweet_id):
         return jsonify(tweet_data), 200
     else:
         return jsonify({'error': 'Tweet not found'}), 404
-    
+
 
 @app.route('/tweets/<int:tweet_id>/like', methods=['POST'])
 @require_valid_user

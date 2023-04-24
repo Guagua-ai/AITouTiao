@@ -17,7 +17,7 @@ def chat():
         return jsonify({'error': 'User input is required'}), 400
 
     relevant_results = chatbot.run_with_response(user_input)
-    return jsonify(relevant_results)
+    return jsonify(relevant_results), 200
 
 
 @app.route('/chat/count', methods=['GET'])
@@ -28,4 +28,4 @@ def count_total_records():
         return jsonify({'error': 'User not found'}), 404
 
     count_total_records = chatbot.count_total_records()
-    return jsonify({'count': count_total_records})
+    return jsonify({'count': count_total_records}), 200

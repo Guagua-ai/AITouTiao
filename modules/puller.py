@@ -12,7 +12,7 @@ usernames = ['elonmusk', 'sama', 'ylecun', 'karpathy',
 def collect():
     for username in usernames:
         puller.run(usernames=[username])
-    return jsonify({'message': 'Tweets collected'})
+    return jsonify({'message': 'Tweets collected'}), 200
 
 
 @app.route('/admin/collect_async', methods=['GET'])

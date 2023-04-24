@@ -61,4 +61,4 @@ def get_view_history():
         next_start_token = start_token + per_page
         response_packet['next_start_token'] = next_start_token
 
-    return jsonify(response_packet)
+    return jsonify(response_packet), 200

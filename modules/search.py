@@ -37,18 +37,13 @@ def search_tweets():
     tweets = [
         {
             "id": tweet.id,
-            "source": {
-                'id': tweet.source_id,
-                'name': tweet.source_name
-            },
             "author": tweet.author,
+            "displayname": tweet.display_name,
             "title": tweet.title,
             "description": tweet.description,
             "url": tweet.url,
             "urlToImage": tweet.url_to_image,
             "publishedAt": standard_format(tweet.published_at),
-            "content": '',
-            "likes": tweet.num_likes,
         } for tweet in Tweet.query.filter(Tweet.id.in_(tweet_ids)).all()
     ]
 
@@ -75,4 +70,4 @@ def search_users():
             if user:
                 user_objects.append(user.to_dict())
     
-    return jsonify(user_objects)
+    return jsonify(user_objects), 200
