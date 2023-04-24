@@ -121,16 +121,13 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return user
 
-    def like_tweet(self, tweet):
-        self.liked_tweets.append(tweet)
+    def add_like(self, like):
+        self.likes.append(like)
         db.session.commit()
 
-    def unlike_tweet(self, tweet):
-        self.liked_tweets.remove(tweet)
+    def remove_like(self, tweet):
+        self.likes.remove(tweet)
         db.session.commit()
 
-    def is_liked(self, tweet):
-        return tweet in self.liked_tweets
-
-    def get_liked_tweets(self):
-        return self.liked_tweets
+    def get_likes(self):
+        return self.likes

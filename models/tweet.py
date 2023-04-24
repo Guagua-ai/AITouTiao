@@ -140,11 +140,24 @@ class Tweet(db.Model):
             ViewHistory.post_id).filter_by(user_id=user_id))).all()
         return tweets
 
-    def like(self):
+    def like_count(self):
+        if self.num_likes is None:
+            self.num_likes = 0
+        return self.num_likes
+
+    def add_like(self, like):
+        if self.num_likes is None:
+            self.num_likes = 0
         self.num_likes += 1
+        self.likes.append(like)
         db.session.commit()
 
-    def unlike(self):
+    def remove_like(self, like):
         if self.num_likes > 0:
             self.num_likes -= 1
+        if like in self.likes:
+            self.likes.remove(like)
         db.session.commit()
+
+    def get_likes(self):
+        return self.likes

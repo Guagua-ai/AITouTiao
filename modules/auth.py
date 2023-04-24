@@ -18,6 +18,7 @@ from search.index import create_user_search_index
 from werkzeug.utils import secure_filename
 from utils.auth import is_valid_email
 from db.storage import delete_user_profile_image, get_s3_client, upload_image_to_s3
+from utils.time import standard_format
 
 
 @app.route('/auth/signup', methods=['POST'])
@@ -268,6 +269,30 @@ def reset_password(token):
     user = User.query.filter_by(email=email).first()
     User.set_password(user, new_password)
     return jsonify({"message": "Password updated successfully"}), 200
+
+
+@app.route('/auth/likes', methods=['GET'])
+@require_valid_user
+def all_likes():
+    """
+    Returns the current user's liked tweets.
+    """
+    current_user = User.get_user_by_id(get_jwt_identity())
+    if not current_user:
+        return jsonify({'message': 'User not found'}), 404
+
+    # Convert created_at to standard datetime format
+    likes = [{**like_dict,
+              'created_at': standard_format(like_dict['created_at'], only_date=True)}
+             for like_dict in [like.to_dict() for like in current_user.get_likes()]]
+    if not likes:
+        return jsonify({'message': 'No likes found'}), 404
+
+    return jsonify({
+        'message': 'Likes retrieved successfully',
+        'like_count': len(likes),
+        'likes': likes
+    }), 200
 
 
 # This route is used to reset the password
