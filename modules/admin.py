@@ -169,6 +169,7 @@ def get_all_tweets():
                 'name': tweet.source_name
             },
             "author": tweet.author,
+            "displayname": tweet.display_name,
             "title": tweet.title,
             "description": tweet.description,
             "url": tweet.url,
