@@ -8,6 +8,7 @@ from models.tweet import Tweet
 from modules.utils import admin_required
 from search.index import create_post_search_index, create_user_search_index
 from translator.core import TranslatorCore
+from utils.time import standard_format
 
 
 @app.route('/admin/users', methods=['GET'])
@@ -158,7 +159,21 @@ def get_all_tweets():
     Get all tweets.
     """
     tweets = Tweet.get_all_tweets()
-    return jsonify({'tweets': [tweet.to_dict() for tweet in tweets]}), 200
+    return jsonify([{
+            "id": tweet.id,
+            "source": {
+                'id': tweet.source_id,
+                'name': tweet.source_name
+            },
+            "author": tweet.author,
+            "title": tweet.title,
+            "description": tweet.description,
+            "url": tweet.url,
+            "urlToImage": tweet.url_to_image,
+            "publishedAt": standard_format(tweet.published_at),
+            "content": tweet.content,
+            "likes": tweet.num_likes,
+        } for tweet in tweets]), 200
 
 
 @app.route('/admin/tweets/<int:tweet_id>', methods=['PUT'])
