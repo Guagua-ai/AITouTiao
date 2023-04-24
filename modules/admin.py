@@ -1,13 +1,11 @@
-import datetime
 import os
-from flask_jwt_extended import get_jwt_identity
 import requests
 from app import app
 from flask import jsonify, request
 from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
-from modules.utlis import admin_required, require_valid_user
+from modules.utils import admin_required
 from search.index import create_post_search_index, create_user_search_index
 from translator.core import TranslatorCore
 

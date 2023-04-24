@@ -2,7 +2,7 @@ from app import app, chatbot
 from flask import request, jsonify
 from flask_jwt_extended import get_jwt_identity
 from models.user import User
-from modules.utlis import require_valid_user
+from modules.utils import require_valid_user
 
 
 @app.route('/chat', methods=['POST'])

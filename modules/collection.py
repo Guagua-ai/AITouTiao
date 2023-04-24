@@ -3,7 +3,7 @@ from app import app
 from models.collection import Collection
 from models.user import User
 from models.tweet import Tweet
-from modules.utlis import require_valid_user
+from modules.utils import require_valid_user
 from flask_jwt_extended import get_jwt_identity
 
 from utils.time import standard_format

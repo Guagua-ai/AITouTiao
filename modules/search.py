@@ -3,8 +3,9 @@ from app import app
 from flask import jsonify, request
 from models.tweet import Tweet
 from models.user import User
-from modules.utlis import require_valid_user
+from modules.utils import require_valid_user
 from search.index import create_post_search_index, create_user_search_index
+from utils.time import standard_format
 
 
 @app.route('/search/posts', methods=['GET'])
@@ -33,8 +34,29 @@ def search_tweets():
     # Get the tweets from the database using the tweet IDs
     tweets = Tweet.query.filter(Tweet.id.in_(tweet_ids)).all()
 
+    tweets = [
+        {
+            "id": tweet.id,
+            "source": {
+                'id': tweet.source_id,
+                'name': tweet.source_name
+            },
+            "author": tweet.author,
+            "title": tweet.title,
+            "description": tweet.description,
+            "url": tweet.url,
+            "urlToImage": tweet.url_to_image,
+            "publishedAt": standard_format(tweet.published_at),
+            "content": '',
+            "likes": tweet.num_likes,
+        } for tweet in Tweet.query.filter(Tweet.id.in_(tweet_ids)).all()
+    ]
+
     # Return the tweets as a JSON response
-    return jsonify([tweet.to_dict() for tweet in tweets])
+    return jsonify({
+        "numResults": len(tweets),
+        "tweets": tweets,
+    }), 200
 
 
 @app.route('/search/users', methods=['GET'])

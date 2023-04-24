@@ -1,8 +1,7 @@
 from app import redis_store, jwt
 from functools import wraps
 from flask import jsonify
-from flask_jwt_extended import current_user, verify_jwt_in_request, get_jwt_identity
-from flask_jwt_extended import get_current_user
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from models.user import User
 
 
