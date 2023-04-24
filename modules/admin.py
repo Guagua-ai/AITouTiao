@@ -151,6 +151,16 @@ def purify_tweets():
     return jsonify({'message': 'Tweets purified successfully'}), 200
 
 
+@app.route('/admin/tweets', methods=['GET'])
+@admin_required
+def get_all_tweets():
+    """
+    Get all tweets.
+    """
+    tweets = Tweet.get_all_tweets()
+    return jsonify({'tweets': [tweet.to_dict() for tweet in tweets]}), 200
+
+
 @app.route('/admin/tweets/<int:tweet_id>', methods=['PUT'])
 @admin_required
 def update_tweet(tweet_id):
