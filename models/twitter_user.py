@@ -7,7 +7,7 @@ class TwitterUser(db.Model):
     __tablename__ = 'twitter_users'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer)
+    user_id = Column(String)
     username = Column(String)
     display_name = Column(String)
     profile_image_url = Column(String)
