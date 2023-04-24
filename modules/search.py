@@ -48,10 +48,7 @@ def search_tweets():
     ]
 
     # Return the tweets as a JSON response
-    return jsonify({
-        "numResults": len(tweets),
-        "tweets": tweets,
-    }), 200
+    return jsonify(tweets), 200
 
 
 @app.route('/search/users', methods=['GET'])
