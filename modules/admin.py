@@ -183,6 +183,45 @@ def get_all_tweets():
     return jsonify(response_packet), 200
 
 
+@app.route('/admin/tweets', methods=['POST'])
+@admin_required
+def create_tweet():
+    """
+    Create a new tweet.
+    Expects a JSON payload with the tweet's information in the request body.
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'No data provided'}), 400
+
+    source_id = data.get('source_id')
+    source_name = data.get('source_name')
+    author = data.get('author')
+    display_name = data.get('displayname')
+    title = data.get('title')
+    description = data.get('description')
+    url = data.get('url')
+    url_to_image = data.get('urlToImage')
+    content = data.get('content')
+    published_at = data.get('publishedAt')
+
+    if not all([source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at]):
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    tweet = Tweet(source_id=source_id,
+                  source_name=source_name,
+                  author=author,
+                  display_name=display_name,
+                  title=title,
+                  description=description,
+                  url=url,
+                  url_to_image=url_to_image,
+                  content=content,
+                  published_at=published_at)
+    tweet.save()
+    return jsonify({'message': 'Tweet created successfully'}), 201
+
+
 @app.route('/admin/tweets/<int:tweet_id>', methods=['PUT'])
 @admin_required
 def update_tweet(tweet_id):
