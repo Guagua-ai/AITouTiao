@@ -174,7 +174,7 @@ def get_all_tweets():
             "description": tweet.description,
             "url": tweet.url,
             "urlToImage": tweet.url_to_image,
-            "publishedAt": standard_format(tweet.published_at),
+            "publishedAt": tweet.published_at,
             "content": tweet.content,
             "likes": tweet.num_likes,
         } for tweet in tweets]
