@@ -34,6 +34,10 @@ class Collection(db.Model):
             'userId': self.user_id,
         }
 
+    def remove_tweet(self, tweet):
+        self.tweets.remove(tweet)
+        db.session.commit()
+
     def create_collection(user_id, name):
         collection = Collection(name=name, user_id=user_id)
         db.session.add(collection)
