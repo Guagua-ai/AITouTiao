@@ -5,8 +5,6 @@ from models.tweet import Tweet
 from models.user import User
 from modules.utils import require_valid_user
 from search.index import create_post_search_index, create_user_search_index
-from utils.time import standard_format
-
 
 @app.route('/search/posts', methods=['GET'])
 def search_tweets():
@@ -32,19 +30,11 @@ def search_tweets():
     tweet_ids = [result['objectID'] for result in results['hits']]
 
     # Get the tweets from the database using the tweet IDs
-    tweets = Tweet.query.filter(Tweet.id.in_(tweet_ids)).all()
+    tweets = Tweet.get_tweets_by_ids(tweet_ids)
+    tweets_dict = {tweet.id: tweet for tweet in tweets}
 
     tweets = [
-        {
-            "id": tweet.id,
-            "author": tweet.author,
-            "displayname": tweet.display_name,
-            "title": tweet.title,
-            "description": tweet.description,
-            "url": tweet.url,
-            "urlToImage": tweet.url_to_image,
-            "publishedAt": standard_format(tweet.published_at),
-        } for tweet in Tweet.query.filter(Tweet.id.in_(tweet_ids)).all()
+        tweets_dict[tweet_id].to_ext_dict() for tweet_id in tweet_ids
     ]
 
     # Return the tweets as a JSON response
@@ -65,6 +55,8 @@ def search_users():
         for user_hit in user_results['hits']:
             user = User.query.filter_by(id=user_hit['objectID']).first()
             if user:
-                user_objects.append(user.to_dict())
+                user_objects.append(user.to_ext_dict())
+            else:
+                create_user_search_index().delete_object(user_hit['objectID'])
     
     return jsonify(user_objects), 200
