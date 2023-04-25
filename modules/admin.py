@@ -1,8 +1,8 @@
-import datetime
 import os
 import requests
 from app import app
 from flask import jsonify, request
+from datetime import datetime
 from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
