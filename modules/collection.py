@@ -156,8 +156,10 @@ def remove_tweet_from_collection(collection_id, tweet_id):
     if not current_user.id:
         return jsonify({'error': 'User ID is required'}), 400
 
-    collection = Collection.get_collection_by_id_and_user_id(
-        collection_id, current_user.id)
+    if collection_id == 0:
+        collection = Collection.get_collection_by_name(user_id=current_user.id, name='Favorites')
+    else:
+        collection = Collection.get_collection_by_id_and_user_id(collection_id, current_user.id)
     if not collection:
         return jsonify({'error': f'Collection with ID {collection_id} not found'}), 404
 
