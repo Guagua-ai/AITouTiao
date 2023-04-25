@@ -8,7 +8,7 @@ class Collection(db.Model):
     __tablename__ = 'collections'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), nullable=False, unique=True)
+    name = Column(String(50), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     last_accessed_at = Column(DateTime, default=datetime.utcnow)
