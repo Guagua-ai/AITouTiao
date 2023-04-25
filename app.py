@@ -45,9 +45,6 @@ redis_store = FlaskRedis(app)
 # Create the chatbot and puller
 open_ai_api = os.getenv('OPENAI_API_KEY')
 
-# Use local mode
-enable_local_mode = os.getenv("LOCAL_MODE", "False") == "True"
-
 # Create the queue
 q = FlowMachine(connection=os.getenv('REDIS_URL'))
 
@@ -61,9 +58,7 @@ app.config['S3_BUCKET_NAME'] = os.getenv('DEPLOY_ENV') + '-news-tweet-photo'
 translator = TranslatorCore(api_key=open_ai_api)
 
 # Create the puller
-puller = Puller(api_key=open_ai_api,
-                translator=translator,
-                local=enable_local_mode)
+puller = Puller(api_key=open_ai_api, translator=translator)
 
 # Create the chatbot
-chatbot = Chatbot(api_key=open_ai_api, local=enable_local_mode)
+chatbot = Chatbot(api_key=open_ai_api)

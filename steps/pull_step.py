@@ -17,6 +17,5 @@ class PullStep(Step):
         assert os.getenv('REDIS_URL'), 'Please provide a Redis URL'
         puller = Puller(
             api_key=os.getenv('OPENAI_API_KEY'),
-            translator=TranslatorCore(api_key=os.getenv('OPENAI_API_KEY')),
-            local=os.getenv('LOCAL'))
+            translator=TranslatorCore(api_key=os.getenv('OPENAI_API_KEY')))
         return puller.run(*args)

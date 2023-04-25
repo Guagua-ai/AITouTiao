@@ -19,12 +19,11 @@ from tenacity import retry, wait_exponential, stop_after_attempt
 class Puller(object):
     ''' Puller class '''
 
-    def __init__(self, api_key, translator=None, local=False):
+    def __init__(self, api_key, translator=None):
         assert api_key, 'Please provide an OpenAI API key'
         openai.api_key = api_key
         self.config = TweetConfig()
         self.translator = translator
-        self.local = local
 
         # Add Twitter API credentials
         self.version = 2
@@ -335,24 +334,15 @@ class Puller(object):
             all_tweets = self.retrieve_tweets_of_users_v2(usernames)
         all_tweets_indices = []
 
-        if self.local:
-            import pandas as pd
-            df = pd.DataFrame(all_tweets)
-            df.to_csv('ai_tweets_translated.csv', index=False)
-        else:
-            session = get_connection()
-            for tweet in all_tweets:
-                new_tweet = self.store_tweets_to_database(session, tweet)
-                # create search index
-                all_tweets_indices.append(new_tweet.to_index_dict())
-            session.close()
+        session = get_connection()
+        for tweet in all_tweets:
+            new_tweet = self.store_tweets_to_database(session, tweet)
+            # create search index
+            all_tweets_indices.append(new_tweet.to_index_dict())
+        session.close()
 
         # save to algolia in batches
         create_post_search_index().save_objects(all_tweets_indices)
 
         elapsed_time = time.time() - start_time
-        if self.local:
-            print(
-                f"Saved results to ai_tweets_translated.csv in {elapsed_time:.2f} seconds")
-        else:
-            print(f"Saved results to database in {elapsed_time:.2f} seconds")
+        print(f"Saved results to database in {elapsed_time:.2f} seconds")
