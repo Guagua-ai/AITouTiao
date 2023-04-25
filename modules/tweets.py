@@ -26,9 +26,9 @@ def tweets():
             like.tweet_id for like in current_user.get_likes()]
         for tweet in tweet_data:
             if tweet['id'] in liked_tweets:
-                tweet['liked'] = True
+                tweet['isLiked'] = True
             if tweet['id'] in collected_tweets:
-                tweet['collected'] = True
+                tweet['isCollected'] = True
 
     response_packet = {
         "totalResults": len(tweet_data),
@@ -74,9 +74,9 @@ def tweets_pagination():
             like.tweet_id for like in current_user.get_likes()]
         for tweet in paginated_data:
             if tweet['id'] in liked_tweets:
-                tweet['liked'] = True
+                tweet['isLiked'] = True
             if tweet['id'] in collected_tweets:
-                tweet['collected'] = True
+                tweet['isCollected'] = True
 
     # Add 'next_start_token' to the response_packet if there are more tweets available
     if start_token + per_page < len(tweet_data):
@@ -123,7 +123,10 @@ def like_tweet(tweet_id):
     like = Like.create_like(user_id=current_user.id, tweet_id=tweet.id)
     tweet.add_like(like)
 
-    return jsonify({'message': 'Like recorded successfully'}), 200
+    return jsonify({
+        'message': 'Tweet liked',
+        'tweet': tweet.to_ext_dict(),
+    }), 200
 
 
 @app.route('/tweets/<int:tweet_id>/likes', methods=['GET'])
@@ -145,9 +148,9 @@ def get_likes_for_tweet(tweet_id):
         user = User.get_user_by_id(like.user_id)
         likes_data.append({
             'id': like.id,
-            'user_id': user.id,
+            'userId': user.id,
             'name': user.name,
-            'profile_image_url': user.profile_image
+            'profileImageUrl': user.profile_image
         })
 
     like_count = tweet.like_count()

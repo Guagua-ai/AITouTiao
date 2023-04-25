@@ -25,6 +25,13 @@ class Like(db.Model):
             'tweet_id': self.tweet_id,
             'created_at': self.created_at,
         }
+    
+    def to_ext_dict(self):
+        return {
+            'id': self.id,
+            'userId': self.user_id,
+            'tweetId': self.tweet_id,
+        }
 
     def create_like(user_id, tweet_id):
         like = Like(user_id=user_id, tweet_id=tweet_id)

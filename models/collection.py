@@ -57,6 +57,16 @@ class Collection(db.Model):
         collection.last_accessed_at = datetime.utcnow()
         db.session.commit()
         return collection
+    
+    def is_favorite_collection(self) -> bool:
+        return self.name == 'Favorites'
+    
+    def is_tweet_in_favorite_collection(self, user_id, tweet_id) -> bool:
+        from models.tweet import Tweet
+        tweet = Tweet.get_tweet_by_id(tweet_id)
+        if tweet is None:
+            return False
+        return tweet in self.tweets
 
     def get_collections_by_user_id(user_id):
         return Collection.query.filter_by(user_id=user_id).order_by(desc(Collection.last_accessed_at)).all()
