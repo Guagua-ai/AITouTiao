@@ -21,5 +21,5 @@ def standard_format(published_at: datetime, only_date=False):
     else:
         # Format the datetime object using Babel
         published_at_formatted = format_datetime(
-            published_at, "yyyy年MM月dd日 HH:mm:ss", locale='zh_CN')
+            published_at, "yyyy年MM月dd日", locale='zh_CN')
         return published_at_formatted
