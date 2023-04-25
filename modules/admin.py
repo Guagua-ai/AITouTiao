@@ -1,3 +1,4 @@
+import datetime
 import os
 import requests
 from app import app
@@ -178,8 +179,8 @@ def create_tweet():
     if not data:
         return jsonify({'message': 'No data provided'}), 400
 
-    source_id = data.get('source_id')
-    source_name = data.get('source_name')
+    source_id = data.get('sourceId')
+    source_name = data.get('sourceName')
     author = data.get('author')
     displayname = data.get('displayname')
     title = data.get('title')
@@ -187,9 +188,8 @@ def create_tweet():
     url = data.get('url')
     url_to_image = data.get('urlToImage')
     content = data.get('content')
-    published_at = data.get('publishedAt')
 
-    if not all([source_id, source_name, author, displayname, title, description, url, url_to_image, content, published_at]):
+    if not all([source_id, source_name, author, displayname, title, description, url, url_to_image, content]):
         return jsonify({'message': 'Missing required fields'}), 400
 
     tweet = Tweet.add_tweet(
@@ -202,7 +202,7 @@ def create_tweet():
                 url=url,
                 url_to_image=url_to_image,
                 content=content,
-                published_at=published_at)
+                published_at=datetime.now())
     create_post_search_index().save_object(tweet.to_index_dict())
 
     return jsonify({'message': 'Tweet created successfully'}), 201
