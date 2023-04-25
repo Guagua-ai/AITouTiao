@@ -2,7 +2,6 @@ import os
 import requests
 from app import app
 from flask import jsonify, request
-from datetime import datetime
 from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
@@ -201,8 +200,7 @@ def create_tweet():
                 description=description,
                 url=url,
                 url_to_image=url_to_image,
-                content=content,
-                published_at=datetime.now())
+                content=content)
     create_post_search_index().save_object(tweet.to_index_dict())
 
     return jsonify({'message': 'Tweet created successfully'}), 201

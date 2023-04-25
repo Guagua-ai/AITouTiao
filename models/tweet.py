@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, desc
 from sqlalchemy.orm import relationship
 from models.view_history import ViewHistory
@@ -111,7 +111,7 @@ class Tweet(db.Model):
     def count_tweets():
         return Tweet.query.count()
 
-    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, published_at, content):
+    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at=datetime.now()):
         new_tweet = Tweet(source_id=source_id,
                           source_name=source_name,
                           author=author,
