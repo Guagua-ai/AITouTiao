@@ -8,7 +8,6 @@ from models.tweet import Tweet
 from modules.utils import admin_required
 from search.index import create_post_search_index, create_user_search_index
 from translator.core import TranslatorCore
-from utils.time import standard_format
 
 
 @app.route('/admin/users', methods=['GET'])
@@ -162,22 +161,7 @@ def get_all_tweets():
 
     response_packet = {
         "totalResults": len(tweets),
-        "articles": [{
-            "id": tweet.id,
-            "source": {
-                'id': tweet.source_id,
-                'name': tweet.source_name
-            },
-            "author": tweet.author,
-            "displayname": tweet.display_name,
-            "title": tweet.title,
-            "description": tweet.description,
-            "url": tweet.url,
-            "urlToImage": tweet.url_to_image,
-            "publishedAt": tweet.published_at,
-            "content": tweet.content,
-            "likes": tweet.num_likes,
-        } for tweet in tweets]
+        "articles": [tweet.to_ext_dict() for tweet in tweets]
     }
 
     return jsonify(response_packet), 200
@@ -197,7 +181,7 @@ def create_tweet():
     source_id = data.get('source_id')
     source_name = data.get('source_name')
     author = data.get('author')
-    display_name = data.get('displayname')
+    displayname = data.get('displayname')
     title = data.get('title')
     description = data.get('description')
     url = data.get('url')
@@ -205,20 +189,22 @@ def create_tweet():
     content = data.get('content')
     published_at = data.get('publishedAt')
 
-    if not all([source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at]):
+    if not all([source_id, source_name, author, displayname, title, description, url, url_to_image, content, published_at]):
         return jsonify({'message': 'Missing required fields'}), 400
 
-    tweet = Tweet(source_id=source_id,
-                  source_name=source_name,
-                  author=author,
-                  display_name=display_name,
-                  title=title,
-                  description=description,
-                  url=url,
-                  url_to_image=url_to_image,
-                  content=content,
-                  published_at=published_at)
-    tweet.save()
+    tweet = Tweet.add_tweet(
+                source_id=source_id,
+                source_name=source_name,
+                author=author,
+                display_name=displayname,
+                title=title,
+                description=description,
+                url=url,
+                url_to_image=url_to_image,
+                content=content,
+                published_at=published_at)
+    create_post_search_index().save_object(tweet.to_index_dict())
+
     return jsonify({'message': 'Tweet created successfully'}), 201
 
 
@@ -240,7 +226,7 @@ def update_tweet(tweet_id):
     source_id = data.get('source_id')
     source_name = data.get('source_name')
     author = data.get('author')
-    display_name = data.get('display_name')
+    display_name = data.get('displayname')
     title = data.get('title')
     description = data.get('description')
     url = data.get('url')
