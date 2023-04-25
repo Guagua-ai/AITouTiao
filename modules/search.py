@@ -32,10 +32,8 @@ def search_tweets():
     # Get the tweets from the database using the tweet IDs
     tweets = Tweet.get_tweets_by_ids(tweet_ids)
 
-    # Convert the tweets to a dictionary with the tweet ID as the key
-    print(tweet_ids)
-    tweets_dict = {tweet.id: tweet for tweet in tweets}
-    print(tweets_dict)
+    # Convert the tweets to a dictionary with the tweet ID string as the key
+    tweets_dict = {str(tweet.id): tweet for tweet in tweets}
 
     tweets = [
         tweets_dict[tweet_id].to_ext_dict() for tweet_id in tweet_ids
