@@ -43,6 +43,18 @@ class User(db.Model, UserMixin):
             'updated_at': self.updated_at,
             'likes': len(self.likes),
         }
+    
+    def to_ext_dict(self, access_token=None, refresh_token=None):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
+            'profileImage': self.profile_image,
+            'createdAt': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'accessToken': access_token,
+            'refreshToken': refresh_token,
+        }
 
     def to_index_dict(self):
         return {

@@ -69,15 +69,7 @@ def signup():
 
     return jsonify({
         'message': 'User created successfully',
-        "user": {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "profile_image": user.profile_image,
-            "created_at": user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-        },
+        "user": user.to_ext_dict(access_token=access_token, refresh_token=refresh_token),
     }), 201
 
 
@@ -116,16 +108,7 @@ def login():
     refresh_token = create_refresh_token(identity=user.id)
     return jsonify({
         'message': 'User logged in successfully',
-        "user": {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "phone": user.phone,
-            "profile_image": user.profile_image,
-            "created_at": user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-        },
+        "user": user.to_ext_dict(access_token=access_token, refresh_token=refresh_token),
     }), 200
 
 
@@ -158,14 +141,7 @@ def profile():
     if not current_user:
         return jsonify({'message': 'User not found'}), 404
 
-    return jsonify({
-        'id': current_user.id,
-        'name': current_user.name,
-        "email": current_user.email,
-        "phone": current_user.phone,
-        "profile_image": current_user.profile_image,
-        'created_at': current_user.created_at.strftime('%Y-%m-%d %H:%M:%S')
-    }), 200
+    return jsonify(current_user.to_ext_dict()), 200
 
 
 @app.route('/auth/refresh', methods=['POST'])
@@ -179,7 +155,7 @@ def refresh():
         return jsonify({'message': 'User not found'}), 404
     access_token = create_access_token(identity=current_user.id, additional_claims={
                                        "is_admin": current_user.is_admin()})
-    return jsonify({'access_token': access_token}), 200
+    return jsonify({'accessToken': access_token}), 200
 
 
 @app.route('/auth', methods=['DELETE'])
@@ -231,7 +207,7 @@ def upload_profile():
 
     response = {
         'message': 'File uploaded successfully',
-        'file_url': f'https://common-profile.s3.amazonaws.com/{file_path}'
+        'fileUrl': f'https://common-profile.s3.amazonaws.com/{file_path}'
     }
     return jsonify(response), 200
 
@@ -290,7 +266,7 @@ def all_likes():
 
     return jsonify({
         'message': 'Likes retrieved successfully',
-        'like_count': len(likes),
+        'likeCount': len(likes),
         'likes': likes
     }), 200
 
