@@ -3,8 +3,18 @@ from flask import jsonify
 from steps import PullStep
 from modules.utils import admin_required
 
-usernames = ['elonmusk', 'sama', 'ylecun', 'karpathy',
-             'goodfellow_ian', 'demishassabis', 'OpenAI', 'DeepMind']
+usernames = ['elonmusk',
+             'sama',
+             'ylecun',
+             'karpathy',
+             'goodfellow_ian',
+             'demishassabis',
+             'OpenAI',
+             'DeepMind',
+             'lexfridman',
+             'ClementDelangue',
+             'OfficialLoganK'
+             ]
 
 
 @app.route('/admin/collect', methods=['GET'])
