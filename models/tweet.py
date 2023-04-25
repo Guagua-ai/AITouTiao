@@ -6,6 +6,7 @@ from models.collection import Collection
 from models.collection_tweet import CollectionsTweets
 from models.like import Like
 from models import db
+from utils.time import standard_format
 
 
 class Tweet(db.Model):
@@ -52,6 +53,27 @@ class Tweet(db.Model):
             'created_at': self.created_at,
             'content': self.content,
             'num_likes': self.num_likes
+        }
+    
+    def to_ext_dict(self, needs_content=False):
+        return {
+            'id': self.id,
+            'source': {
+                'id': self.source_id,
+                'name': self.source_name
+            },
+            'author': self.author,
+            'displayname': self.display_name,
+            'title': self.title,
+            'description': self.description,
+            'url': self.url,
+            'urlToImage': self.url_to_image,
+            'publishedAt': standard_format(self.published_at),
+            'createdAt': standard_format(self.created_at),
+            'content': self.content if needs_content else '',
+            'numLike': self.num_likes,
+            'isLiked': False,
+            'isCollected': False,
         }
 
     def to_index_dict(self):

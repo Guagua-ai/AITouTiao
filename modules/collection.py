@@ -1,12 +1,11 @@
 from flask import request, jsonify
 from app import app
 from models.collection import Collection
+from models.like import Like
 from models.user import User
 from models.tweet import Tweet
 from modules.utils import require_valid_user
 from flask_jwt_extended import get_jwt_identity
-
-from utils.time import standard_format
 
 
 @app.route('/collections', methods=['POST'])
@@ -22,7 +21,7 @@ def create_collection():
 
     try:
         collection = Collection.create_collection(current_user.id, name)
-        return jsonify({'id': collection.id, 'user_id': collection.user_id, 'name': collection.name}), 201
+        return jsonify({'id': collection.id, 'userId': collection.user_id, 'name': collection.name}), 201
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
 
@@ -37,8 +36,12 @@ def add_tweet_to_collection(collection_id):
     tweet_id = request.json.get('tweet_id')
     if not tweet_id:
         return jsonify({'error': 'Tweet ID is required'}), 400
-
-    collection = Collection.get_collection_by_id(collection_id)
+    
+    collection = None
+    if collection_id == 0:
+        collection = Collection.get_collection_by_name(user_id=current_user.id, name='Favorites')
+    else:
+        collection = Collection.get_collection_by_id(collection_id)
     if not collection:
         return jsonify({'error': f'Collection with ID {collection_id} not found'}), 404
 
@@ -48,7 +51,7 @@ def add_tweet_to_collection(collection_id):
 
     try:
         collection.add_tweet_to_collection(tweet.id)
-        return jsonify({'collection_id': collection.id, 'tweet_id': tweet.id}), 201
+        return jsonify({'collectionId': collection.id, 'tweetId': tweet.id}), 201
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
 
@@ -81,17 +84,17 @@ def get_collections():
         "collections": [{
             'id': collection.id,
             'name': collection.name,
-            'created_at': collection.created_at
+            'createdAt': collection.created_at
         } for collection in paginated_data],
-        "next_start_token": None
+        "nextStartToken": None
     }
 
     # Add 'next_start_token' to the response_packet if there are more tweets available
     if start_token + per_page < len(collections):
         next_start_token = start_token + per_page
-        response_packet['next_start_token'] = next_start_token
+        response_packet['nextStartToken'] = next_start_token
 
-    return jsonify(response_packet)
+    return jsonify(response_packet), 200
 
 
 @app.route('/collections/<int:collection_id>/tweets', methods=['GET'])
@@ -120,43 +123,28 @@ def get_tweets_from_collection(collection_id):
 
     # Paginate the tweet_data using the start_token
     paginated_data = tweets[start_token: start_token + per_page]
+    liked_tweets = Like.get_likes_by_user_id_and_tweet_ids(current_user.id, [tweet.id for tweet in paginated_data])
+    liked_tweets_ids = {like.tweet_id: like for like in liked_tweets}
+
+    paginated_tweets = [tweet.to_ext_dict() for tweet in paginated_data]
+    for idx, tweet in enumerate(paginated_tweets):
+        if tweet['id'] in liked_tweets_ids:
+            paginated_tweets[idx]['isLiked'] = True
+        paginated_tweets[idx]['isCollected'] = True
 
     response_packet = {
-        "status": "ok",
         "totalResults": len(tweets),
         "perPage": per_page,
-        "tweets": [{
-            "id": tweet.id,
-            "source": {
-                'id': tweet.source_id,
-                'name': tweet.source_name
-            },
-            "author": tweet.author,
-            "title": tweet.title,
-            "description": tweet.description,
-            "url": tweet.url,
-            "urlToImage": tweet.url_to_image,
-            "publishedAt": standard_format(tweet.published_at),
-            "content": tweet.content
-        } for tweet in paginated_data],
-        "next_start_token": None
+        "tweets": paginated_tweets,
+        "nextStartToken": None
     }
 
-    # Add 'next_start_token' to the response_packet if there are more tweets available
+    # Add 'nextStartToken' to the response_packet if there are more tweets available
     if start_token + per_page < len(tweets):
         next_start_token = start_token + per_page
-        response_packet['next_start_token'] = next_start_token
+        response_packet['nextStartToken'] = next_start_token
 
-    return jsonify([{
-        'id': tweet.id,
-        'author': tweet.author,
-        'title': tweet.title,
-        'description': tweet.description,
-        'url': tweet.url,
-        'url_to_image': tweet.url_to_image,
-        'published_at': tweet.published_at,
-        'content': tweet.content
-    } for tweet in tweets]), 200
+    return response_packet, 200
 
 
 @app.route('/collections/<int:collection_id>/tweets/<int:tweet_id>', methods=['DELETE'])
@@ -177,6 +165,6 @@ def remove_tweet_from_collection(collection_id, tweet_id):
 
     try:
         collection.remove_tweet(tweet)
-        return jsonify({'collection_id': collection.id, 'tweet_id': tweet.id}), 200
+        return jsonify({'collectionId': collection.id, 'tweetId': tweet.id})
     except ValueError as e:
         return jsonify({'error': str(e)}), 400

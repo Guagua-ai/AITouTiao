@@ -26,6 +26,13 @@ class Collection(db.Model):
             'created_at': self.created_at,
             'last_accessed_at': self.last_accessed_at,
         }
+    
+    def to_ext_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'userId': self.user_id,
+        }
 
     def create_collection(user_id, name):
         collection = Collection(name=name, user_id=user_id)
@@ -36,6 +43,15 @@ class Collection(db.Model):
     def get_collection_by_id(id):
         # update last_accessed_at
         collection = Collection.query.filter_by(id=id).first()
+        if collection is None:
+            return None
+        collection.last_accessed_at = datetime.utcnow()
+        db.session.commit()
+        return collection
+    
+    def get_collection_by_name(user_id, name):
+        # update last_accessed_at
+        collection = Collection.query.filter_by(user_id=user_id, name=name).first()
         if collection is None:
             return None
         collection.last_accessed_at = datetime.utcnow()

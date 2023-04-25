@@ -43,6 +43,9 @@ class Like(db.Model):
 
     def get_likes_by_tweet_id(tweet_id):
         return Like.query.filter_by(tweet_id=tweet_id).all()
+    
+    def get_likes_by_user_id_and_tweet_ids(user_id, tweet_ids):
+        return Like.query.filter(Like.user_id == user_id, Like.tweet_id.in_(tweet_ids)).all()
 
     def unlike_by_id(id):
         like = Like.get_like_by_id(id)
