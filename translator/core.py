@@ -32,6 +32,13 @@ class TranslatorCore(object):
     content_keys = ['content', 'Content', 'CONTENT', '内容',
                     '正文', '正文内容', '正文摘要', '正文概要', '內容', '內容摘要', '內容概要']
 
+    non_translatable_terms = {
+        "深度思维": "DeepMind",
+        "斯玛·阿尔特曼": "Sam Altman",
+        "斯玛·阿尔特曼": "Sam Altman",
+        "安德烈·卡帕斯基": "Andrej Karpathy",
+    }
+
     def __init__(self, api_key=None):
         assert api_key is not None, 'API key is required'
         openai.api_key = api_key
@@ -120,4 +127,10 @@ class TranslatorCore(object):
         ''' Purify the text to simplified Chinese '''
         cc = OpenCC('t2s')  # t2s: Traditional to Simplified
         simplified_text = cc.convert(text)
+
+        # Replace non-translatable terms
+        for term in self.non_translatable_terms:
+            simplified_text = simplified_text.replace(
+                term, self.non_translatable_terms[term])
+
         return simplified_text
