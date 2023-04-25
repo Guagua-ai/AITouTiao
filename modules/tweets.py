@@ -123,10 +123,7 @@ def like_tweet(tweet_id):
     like = Like.create_like(user_id=current_user.id, tweet_id=tweet.id)
     tweet.add_like(like)
 
-    return jsonify({
-        'message': 'Tweet liked',
-        'tweet': tweet.to_ext_dict(),
-    }), 200
+    return jsonify({'message': 'Tweet liked'}), 200
 
 
 @app.route('/tweets/<int:tweet_id>/likes', methods=['GET'])
@@ -154,7 +151,6 @@ def get_likes_for_tweet(tweet_id):
         })
 
     like_count = tweet.like_count()
-    print(like_count)
     return jsonify({'likes': likes_data, 'like_count': like_count}), 200
 
 
