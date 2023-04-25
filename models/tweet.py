@@ -125,6 +125,7 @@ class Tweet(db.Model):
                           content=content)
         db.session.add(new_tweet)
         db.session.commit()
+        return new_tweet
 
     def update_tweet(id, source_id=None, source_name=None, author=None, display_name=None, title=None, description=None, url=None, url_to_image=None, published_at=None, content=None):
         tweet_to_update = Tweet.query.filter_by(id=id).first()
