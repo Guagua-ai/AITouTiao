@@ -15,7 +15,7 @@ def add_to_view_history():
     if not current_user.id or not tweet_id:
         return jsonify({'error': 'User ID and tweet ID are required'}), 400
     view_history = ViewHistory.add_to_view_history(current_user.id, tweet_id)
-    return jsonify({'user_id': view_history.user_id, 'tweet_id': view_history.post_id, 'timestamp': view_history.timestamp}), 201
+    return jsonify({'userId': view_history.user_id, 'tweetId': view_history.post_id, 'timestamp': view_history.timestamp}), 201
 
 
 @app.route('/view_history', methods=['GET'])
@@ -40,25 +40,15 @@ def get_view_history():
     tweets_from_view_history = Tweet.get_tweets_by_ids(
         [item.post_id for item in paginated_data])
     response_packet = {
-        "status": "ok",
         "totalResults": len(view_history),
         "perPage": per_page,
-        "view_history": [{
-            'id': tweet.id,
-            'author': tweet.author,
-            'title': tweet.title,
-            'description': tweet.description,
-            'url': tweet.url,
-            'url_to_image': tweet.url_to_image,
-            'published_at': tweet.published_at,
-            'content': '',
-        } for tweet in tweets_from_view_history],
-        "next_start_token": None
+        "viewHistory": [tweet.to_ext_dict() for tweet in tweets_from_view_history],
+        "nextStartToken": None
     }
 
     # Add 'next_start_token' to the response_packet if there are more tweets available
     if start_token + per_page < len(view_history):
         next_start_token = start_token + per_page
-        response_packet['next_start_token'] = next_start_token
+        response_packet['nextStartToken'] = next_start_token
 
     return jsonify(response_packet), 200
