@@ -69,6 +69,13 @@ class Collection(db.Model):
         collection.last_accessed_at = datetime.utcnow()
         db.session.commit()
         return collection
+    
+    def is_tweet_in_collection(self, tweet_id) -> bool:
+        from models.tweet import Tweet
+        tweet = Tweet.get_tweet_by_id(tweet_id)
+        if tweet is None:
+            return False
+        return tweet in self.tweets
 
     def add_tweet_to_collection(self, tweet_id):
         from models.tweet import Tweet

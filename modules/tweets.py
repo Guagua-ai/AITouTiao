@@ -2,6 +2,7 @@ from urllib import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import app, chatbot
 from flask import request, jsonify
+from models.collection import Collection
 from models.like import Like
 from models.tweet import Tweet
 from models.user import User
@@ -10,8 +11,24 @@ from modules.utils import require_valid_user
 
 
 @app.route('/tweets', methods=['GET'])
+@jwt_required(optional=True)
 def tweets():
     tweet_data = chatbot.get_tweet_data()
+    
+    if get_jwt_identity():
+        current_user = User.get_user_by_id(get_jwt_identity())
+        if not current_user:
+            return jsonify({'error': 'User not found'}), 404
+        collected_tweets = [
+            tweet.id for tweet in Collection.get_collection_by_name(user_id=current_user.id, name='Favorites').tweets]
+        
+        liked_tweets = [
+            like.tweet_id for like in current_user.get_likes()]
+        for tweet in tweet_data:
+            if tweet['id'] in liked_tweets:
+                tweet['liked'] = True
+            if tweet['id'] in collected_tweets:
+                tweet['collected'] = True
 
     response_packet = {
         "totalResults": len(tweet_data),
@@ -22,6 +39,7 @@ def tweets():
 
 
 @app.route('/tweets/pagination', methods=['GET'])
+@jwt_required(optional=True)
 def tweets_pagination():
     since_id = request.args.get('since_id', default=None, type=int)
     per_page = request.args.get('per_page', default=10, type=int)
@@ -42,13 +60,13 @@ def tweets_pagination():
         "totalResults": len(tweet_data),
         "perPage": per_page,
         "articles": paginated_data,
-        "next_start_token": None
+        "nextStartToken": None
     }
 
     # Add 'next_start_token' to the response_packet if there are more tweets available
     if start_token + per_page < len(tweet_data):
         next_start_token = start_token + per_page
-        response_packet['next_start_token'] = next_start_token
+        response_packet['nextStartToken'] = next_start_token
 
     return jsonify(response_packet), 200
 
@@ -58,7 +76,7 @@ def tweets_pagination():
 def get_tweet_by_id(tweet_id):
     tweet = Tweet.get_tweet_by_id(tweet_id)
     if tweet is not None:
-        tweet_data = tweet.to_ext_dict()
+        tweet_data = tweet.to_ext_dict(needs_content=True)
         if get_jwt_identity():
             current_user = User.get_user_by_id(get_jwt_identity())
             ViewHistory.add_to_view_history(current_user.id, tweet_id)

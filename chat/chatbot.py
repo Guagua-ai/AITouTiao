@@ -76,27 +76,7 @@ class Chatbot:
     # Get the tweet data
     def get_tweet_data(self):
         self.data = Tweet.get_all_tweets()
-
-        tweet_data = []
-        for row in self.data:
-            tweet_data.append({
-                "id": row.id,
-                "source": {
-                    'id': row.source_id,
-                    'name': row.source_name
-                },
-                "author": row.author,
-                "displayname": row.display_name,
-                "title": row.title,
-                "description": row.description,
-                "url": row.url,
-                "urlToImage": row.url_to_image,
-                "publishedAt": standard_format(row.published_at),
-                "content": '',
-                "likes": row.num_likes,
-            })
-
-        return tweet_data
+        return [tweet.to_ext_dict() for tweet in self.data]
 
     # Main chatbot function with response
     def run_with_response(self, user_input, use_keyword=False):
