@@ -62,6 +62,21 @@ def tweets_pagination():
         "articles": paginated_data,
         "nextStartToken": None
     }
+    
+    if get_jwt_identity():
+        current_user = User.get_user_by_id(get_jwt_identity())
+        if not current_user:
+            return jsonify({'error': 'User not found'}), 404
+        collected_tweets = [
+            tweet.id for tweet in Collection.get_collection_by_name(user_id=current_user.id, name='Favorites').tweets]
+        
+        liked_tweets = [
+            like.tweet_id for like in current_user.get_likes()]
+        for tweet in paginated_data:
+            if tweet['id'] in liked_tweets:
+                tweet['liked'] = True
+            if tweet['id'] in collected_tweets:
+                tweet['collected'] = True
 
     # Add 'next_start_token' to the response_packet if there are more tweets available
     if start_token + per_page < len(tweet_data):
