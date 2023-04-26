@@ -161,7 +161,7 @@ def get_all_tweets():
 
     response_packet = {
         "totalResults": len(tweets),
-        "articles": [tweet.to_ext_dict(needs_content=True) for tweet in tweets]
+        "articles": [tweet.to_int_dict(needs_content=True) for tweet in tweets]
     }
 
     return jsonify(response_packet), 200
