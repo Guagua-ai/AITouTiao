@@ -1,11 +1,8 @@
 import csv
-import datetime
-import os
 import openai
 from config.chatbot import ChatbotConfig
 from chat.result import format_results
-from chat import Tweet, get_connection
-from utils.time import standard_format
+from chat import Tweet
 
 
 class Chatbot:
@@ -75,7 +72,7 @@ class Chatbot:
 
     # Get the tweet data
     def get_tweet_data(self):
-        self.data = Tweet.get_all_tweets()
+        self.data = Tweet.get_all_tweets(visibility="public")
         return [tweet.to_ext_dict() for tweet in self.data]
 
     # Main chatbot function with response
@@ -87,7 +84,4 @@ class Chatbot:
 
     # Main chatbot function
     def run(self, user_input, use_keyword=False):
-        relevant_results = self.find_relevant_results(user_input, use_keyword)
-        print(f"Found {len(relevant_results)} relevant results.\n")
-        response = self.format_results(relevant_results)
-        print(response)
+        print(self.run_with_response(user_input, use_keyword))

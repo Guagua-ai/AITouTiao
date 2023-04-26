@@ -8,7 +8,6 @@ import snscrape.modules.twitter as sntwitter
 from flask import Flask
 from db.conn import db, get_connection
 from db.storage import check_if_object_exists_on_s3, upload_image_to_s3
-from search import create_post_search_index
 from sqlalchemy.exc import IntegrityError
 from models.tweet import Tweet
 from models.twitter_user import TwitterUser
@@ -337,12 +336,8 @@ class Puller(object):
         session = get_connection()
         for tweet in all_tweets:
             new_tweet = self.store_tweets_to_database(session, tweet)
-            # create search index
-            all_tweets_indices.append(new_tweet.to_index_dict())
+            print(f"Stored tweet {new_tweet} to database")
         session.close()
-
-        # save to algolia in batches
-        create_post_search_index().save_objects(all_tweets_indices)
 
         elapsed_time = time.time() - start_time
         print(f"Saved results to database in {elapsed_time:.2f} seconds")

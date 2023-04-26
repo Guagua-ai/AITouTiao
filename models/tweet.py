@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, desc
+from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
 from models.view_history import ViewHistory
 from models.collection import Collection
@@ -7,7 +7,6 @@ from models.collection_tweet import CollectionsTweets
 from models.like import Like
 from models import db
 from utils.time import standard_format
-
 
 class Tweet(db.Model):
     __tablename__ = 'tweets'
@@ -25,6 +24,7 @@ class Tweet(db.Model):
     published_at = Column(DateTime)
     created_at = Column(DateTime)
     content = Column(String)
+    visibility = Column(String, default="private")
 
     collections = relationship(
         'Collection', secondary='collections_tweets', back_populates='tweets')
@@ -52,7 +52,8 @@ class Tweet(db.Model):
             'published_at': self.published_at,
             'created_at': self.created_at,
             'content': self.content,
-            'num_likes': self.num_likes
+            'num_likes': self.num_likes,
+            'visibility': self.visibility.value,
         }
     
     def to_ext_dict(self, needs_content=False):
@@ -88,8 +89,18 @@ class Tweet(db.Model):
             "published_at": self.published_at,
             "content": self.content,
         }
+    
+    def approve(self):
+        self.visibility = "public"
+        db.session.commit()
+    
+    def flag(self):
+        self.visibility = "reviewing"
+        db.session.commit()
 
-    def get_all_tweets():
+    def get_all_tweets(visibility="private"):
+        if visibility == "reviewing" or visibility == "public":
+            return Tweet.query.filter_by(visibility=visibility).order_by(Tweet.published_at.desc()).all()
         return Tweet.query.order_by(Tweet.published_at.desc()).all()
 
     def get_tweets_by_ids(ids):
@@ -111,7 +122,7 @@ class Tweet(db.Model):
     def count_tweets():
         return Tweet.query.count()
 
-    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at=datetime.now()):
+    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at=datetime.now(), visibility='private'):
         new_tweet = Tweet(source_id=source_id,
                           source_name=source_name,
                           author=author,
@@ -122,12 +133,13 @@ class Tweet(db.Model):
                           url_to_image=url_to_image,
                           published_at=published_at,
                           created_at=datetime.now(),
-                          content=content)
+                          content=content,
+                          visibility=visibility)
         db.session.add(new_tweet)
         db.session.commit()
         return new_tweet
 
-    def update_tweet(id, source_id=None, source_name=None, author=None, display_name=None, title=None, description=None, url=None, url_to_image=None, published_at=None, content=None):
+    def update_tweet(id, source_id=None, source_name=None, author=None, display_name=None, title=None, description=None, url=None, url_to_image=None, published_at=None, content=None, visibility=None):
         tweet_to_update = Tweet.query.filter_by(id=id).first()
         if source_id is not None:
             tweet_to_update.source_id = source_id
@@ -149,6 +161,8 @@ class Tweet(db.Model):
             tweet_to_update.published_at = published_at
         if content is not None:
             tweet_to_update.content = content
+        if visibility is not None:
+            tweet_to_update.visibility = visibility
         db.session.commit()
         return tweet_to_update
 

@@ -201,7 +201,6 @@ def create_tweet():
                 url=url,
                 url_to_image=url_to_image,
                 content=content)
-    create_post_search_index().save_object(tweet.to_index_dict())
 
     return jsonify({'message': 'Tweet created successfully'}), 201
 
@@ -247,6 +246,41 @@ def update_tweet(tweet_id):
         create_post_search_index().save_object(tweet.to_index_dict())
     return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
 
+@app.route('/admin/tweets/<int:tweet_id>/lgtm', methods=['PUT'])
+@admin_required
+def approve_tweet(tweet_id):
+    """
+    Approve a tweet by ID.
+    """
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+    if tweet.visibility == 'public':
+        return jsonify({'message': 'Tweet already approved'}), 400
+
+    tweet.approve()
+    create_post_search_index().save_object(tweet.to_index_dict())
+    return jsonify({'message': 'Tweet approved successfully'}), 200
+
+
+@app.route('/admin/tweets/<int:tweet_id>/flag', methods=['PUT'])
+@admin_required
+def flag_tweet(tweet_id):
+    """
+    Flag a tweet by ID.
+    """
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+    if tweet.visibility == 'reviewing':
+        return jsonify({'message': 'Tweet already flagged'}), 400
+    if tweet.visibility == 'private':
+        return jsonify({'message': 'Tweet already hidden'}), 400
+
+    tweet.flag()
+    create_post_search_index().delete_object(tweet.id)
+    return jsonify({'message': 'Tweet flagged successfully'}), 200
+
 
 @app.route('/admin/tweets/<int:tweet_id>', methods=['DELETE'])
 @admin_required
@@ -259,7 +293,8 @@ def delete_tweet(tweet_id):
         return jsonify({'message': 'Tweet not found'}), 404
 
     tweet.delete()
-    create_post_search_index().delete_object(tweet.id)
+    if tweet.visibility == 'public':
+        create_post_search_index().delete_object(tweet.id)
     return jsonify({'message': 'Tweet deleted successfully'}), 200
 
 
@@ -276,7 +311,7 @@ def reindex_search():
     user_index.save_objects([user.to_index_dict() for user in users])
 
     # Reindex tweets
-    tweets = Tweet.get_all_tweets()
+    tweets = Tweet.get_all_tweets(visibility='public')
     tweet_index = create_post_search_index()
     tweet_index.clear_objects()
     tweet_index.save_objects([tweet.to_index_dict() for tweet in tweets])
