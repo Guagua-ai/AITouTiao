@@ -166,6 +166,9 @@ def remove_tweet_from_collection(collection_id, tweet_id):
     tweet = Tweet.get_tweet_by_id(tweet_id)
     if not tweet:
         return jsonify({'error': f'Tweet with ID {tweet_id} not found'}), 404
+    
+    if not collection.has_tweet(tweet.id):
+        return jsonify({'error': f'Tweet with ID {tweet_id} not found in collection with ID {collection_id}'}), 404
 
     try:
         collection.remove_tweet(tweet)

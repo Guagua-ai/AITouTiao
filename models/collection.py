@@ -53,6 +53,9 @@ class Collection(db.Model):
         db.session.commit()
         return collection
     
+    def has_tweet(self, tweet_id):
+        return self.tweets.filter_by(id=tweet_id).first() is not None
+    
     def get_collection_by_name(user_id, name):
         # update last_accessed_at
         collection = Collection.query.filter_by(user_id=user_id, name=name).first()
