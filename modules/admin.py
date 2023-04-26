@@ -258,7 +258,7 @@ def delete_tweet(tweet_id):
     if not tweet:
         return jsonify({'message': 'Tweet not found'}), 404
 
-    Tweet.delete_tweet(tweet_id)
+    tweet.delete()
     create_post_search_index().delete_object(tweet.id)
     return jsonify({'message': 'Tweet deleted successfully'}), 200
 

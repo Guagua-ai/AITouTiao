@@ -152,10 +152,10 @@ class Tweet(db.Model):
         db.session.commit()
         return tweet_to_update
 
-    def delete_tweet(tweet):
-        for collection in tweet.collections:
-            collection.remove_tweet(tweet)
-        db.session.delete(tweet)
+    def delete(self):
+        for collection in self.collections:
+            collection.remove_tweet(self)
+        db.session.delete(self)
         db.session.commit()
 
     @staticmethod
