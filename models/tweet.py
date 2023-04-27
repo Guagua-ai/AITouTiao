@@ -53,7 +53,7 @@ class Tweet(db.Model):
             'created_at': self.created_at,
             'content': self.content,
             'num_likes': self.num_likes,
-            'visibility': self.visibility.value,
+            'visibility': self.visibility,
         }
     
     def to_int_dict(self, needs_content=False):
