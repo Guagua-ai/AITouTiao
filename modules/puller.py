@@ -3,7 +3,11 @@ from flask import jsonify
 from steps import PullStep
 from modules.utils import admin_required
 
-usernames = ['elonmusk',
+usernames = [
+             'lexfridman',
+             'ClementDelangue',
+             'OfficialLoganK'
+             'elonmusk',
              'sama',
              'ylecun',
              'karpathy',
@@ -11,9 +15,6 @@ usernames = ['elonmusk',
              'demishassabis',
              'OpenAI',
              'DeepMind',
-             'lexfridman',
-             'ClementDelangue',
-             'OfficialLoganK'
              ]
 
 
