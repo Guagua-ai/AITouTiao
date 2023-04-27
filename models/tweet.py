@@ -24,6 +24,7 @@ class Tweet(db.Model):
     published_at = Column(DateTime)
     created_at = Column(DateTime)
     content = Column(String)
+    content_type = Column(String, default="text")
     visibility = Column(String, default="private")
 
     collections = relationship(
@@ -36,7 +37,7 @@ class Tweet(db.Model):
     __table_args__ = (UniqueConstraint('url'),)
 
     def __repr__(self):
-        return f"<Tweet(id={self.id}, author={self.author}, displayname={self.display_name}, title={self.title}, url={self.url})>"
+        return f"<Tweet(id={self.id}, author={self.author}, displayname={self.display_name}, title={self.title}, url={self.url}, content_type={self.content_type}, visibility={self.visibility}>"
 
     def to_dict(self):
         return {
@@ -53,6 +54,7 @@ class Tweet(db.Model):
             'created_at': self.created_at,
             'content': self.content,
             'num_likes': self.num_likes,
+            'content_type': self.content_type,
             'visibility': self.visibility,
         }
     
@@ -69,8 +71,9 @@ class Tweet(db.Model):
             'description': self.description,
             'url': self.url,
             'urlToImage': self.url_to_image,
-            'publishedAt': standard_format(self.published_at),
-            'createdAt': standard_format(self.created_at),
+            'contentType': self.content_type,
+            'publishedAt': self.published_at,
+            'createdAt': self.created_at,
             'content': self.content if needs_content else '',
             'images': [],
             'numLike': self.num_likes,
@@ -95,6 +98,7 @@ class Tweet(db.Model):
             'publishedAt': standard_format(self.published_at),
             'createdAt': standard_format(self.created_at),
             'content': self.content if needs_content else '',
+            'contentType': self.content_type,
             'images': [],
             'numLike': self.num_likes,
             'isLiked': False,
@@ -146,7 +150,7 @@ class Tweet(db.Model):
     def count_tweets():
         return Tweet.query.count()
 
-    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at=datetime.now(), visibility='private'):
+    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at=datetime.now(), content_type='text', visibility='private'):
         new_tweet = Tweet(source_id=source_id,
                           source_name=source_name,
                           author=author,
@@ -158,6 +162,7 @@ class Tweet(db.Model):
                           published_at=published_at,
                           created_at=datetime.now(),
                           content=content,
+                          content_type=content_type,
                           visibility=visibility)
         db.session.add(new_tweet)
         db.session.commit()
