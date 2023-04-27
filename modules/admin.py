@@ -260,7 +260,7 @@ def approve_tweet(tweet_id):
 
     tweet.approve()
     create_post_search_index().save_object(tweet.to_index_dict())
-    return jsonify({'message': 'Tweet approved successfully'}), 200
+    return jsonify({'message': 'Tweet approved successfully', 'tweet': tweet.to_dict()}), 200
 
 
 @app.route('/admin/tweets/<int:tweet_id>/flag', methods=['PUT'])
@@ -279,7 +279,7 @@ def flag_tweet(tweet_id):
 
     tweet.flag()
     create_post_search_index().delete_object(tweet.id)
-    return jsonify({'message': 'Tweet flagged successfully'}), 200
+    return jsonify({'message': 'Tweet flagged successfully', 'tweet': tweet.to_dict()}), 200
 
 
 @app.route('/admin/tweets/<int:tweet_id>', methods=['DELETE'])
