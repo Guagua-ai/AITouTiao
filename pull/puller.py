@@ -9,7 +9,7 @@ from flask import Flask
 from db.conn import db, get_connection
 from db.storage import check_if_object_exists_on_s3, upload_image_to_s3
 from sqlalchemy.exc import IntegrityError
-from gpt_news_feed.search.index import create_internal_post_search_index
+from search.index import create_internal_post_search_index
 from models.tweet import Tweet
 from models.twitter_user import TwitterUser
 from config.tweet import TweetConfig
