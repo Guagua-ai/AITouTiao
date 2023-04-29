@@ -4,13 +4,13 @@ from steps import PullStep
 from modules.utils import admin_required
 
 usernames = [
-             'lexfridman',
+            #  'lexfridman',
             #  'ClementDelangue',
             #  'OfficialLoganK'
-            #  'elonmusk',
-             'sama',
-             'ylecun',
-            #  'karpathy',
+              'elonmusk',
+            #  'sama',
+            #  'ylecun',
+              'karpathy',
             #  'goodfellow_ian',
             #  'demishassabis',
             #  'OpenAI',

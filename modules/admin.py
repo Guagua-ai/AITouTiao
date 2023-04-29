@@ -3,6 +3,7 @@ import requests
 from app import app
 from flask import jsonify, request
 from db.storage import upload_image_to_s3
+from gpt_news_feed.search.index import create_internal_post_search_index
 from models.user import User
 from models.tweet import Tweet
 from modules.utils import admin_required
@@ -201,8 +202,10 @@ def create_tweet():
                 url=url,
                 url_to_image=url_to_image,
                 content=content)
-
-    return jsonify({'message': 'Tweet created successfully'}), 201
+    
+    if tweet.visibility == 'public':
+        create_post_search_index().add_object(tweet.to_index_dict())
+    return jsonify({'message': 'Tweet created successfully', 'tweet': tweet.to_dict()}), 201
 
 
 @app.route('/admin/tweets/<int:tweet_id>', methods=['PUT'])
@@ -242,7 +245,8 @@ def update_tweet(tweet_id):
                                url_to_image=url_to_image,
                                published_at=published_at,
                                content=content)
-    if author or title or description or content or url or url_to_image or published_at:
+    if tweet.visibility == "public" and (author or display_name or title or description or url or url_to_image or published_at or content):
+        create_post_search_index().delete_object(tweet_id)
         create_post_search_index().save_object(tweet.to_index_dict())
     return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
 
@@ -257,9 +261,10 @@ def approve_tweet(tweet_id):
         return jsonify({'message': 'Tweet not found'}), 404
     if tweet.visibility == 'public':
         return jsonify({'message': 'Tweet already approved'}), 400
-
+    
+    if tweet.visibility != 'public':
+        create_post_search_index().save_object(tweet.to_index_dict())
     tweet.approve()
-    create_post_search_index().save_object(tweet.to_index_dict())
     return jsonify({'message': 'Tweet approved successfully', 'tweet': tweet.to_dict()}), 200
 
 
@@ -277,8 +282,10 @@ def flag_tweet(tweet_id):
     if tweet.visibility == 'private':
         return jsonify({'message': 'Tweet already hidden'}), 400
 
+    if tweet.visibility == 'public':
+        create_post_search_index().delete_object(tweet.id)
+
     tweet.flag()
-    create_post_search_index().delete_object(tweet.id)
     return jsonify({'message': 'Tweet flagged successfully', 'tweet': tweet.to_dict()}), 200
 
 
@@ -292,9 +299,9 @@ def delete_tweet(tweet_id):
     if not tweet:
         return jsonify({'message': 'Tweet not found'}), 404
 
-    tweet.delete()
     if tweet.visibility == 'public':
         create_post_search_index().delete_object(tweet.id)
+    tweet.delete()
     return jsonify({'message': 'Tweet deleted successfully'}), 200
 
 
@@ -311,9 +318,55 @@ def reindex_search():
     user_index.save_objects([user.to_index_dict() for user in users])
 
     # Reindex tweets
-    tweets = Tweet.get_all_tweets(visibility='public')
+    public_tweets = Tweet.get_all_tweets(visibility='public')
     tweet_index = create_post_search_index()
     tweet_index.clear_objects()
-    tweet_index.save_objects([tweet.to_index_dict() for tweet in tweets])
+    tweet_index.save_objects([tweet.to_index_dict() for tweet in public_tweets])
+    
+    tweets = Tweet.get_all_tweets()
+    internal_tweet_index = create_internal_post_search_index()
+    internal_tweet_index.clear_objects()
+    internal_tweet_index.save_objects([tweet.to_index_dict() for tweet in tweets])
 
     return jsonify({'message': 'Search reindexed successfully'}), 200
+
+
+@app.route('/admin/search/posts', methods=['GET'])
+@admin_required
+def search_posts():
+    """
+    Search posts by query string.
+    """
+    # Get the search query from the request query parameters
+    query = request.args.get('q')
+
+    # Define the search parameters, including the fuzzy search query and settings
+    request_options = {
+        "query": query,
+        "typoTolerance": "true",
+        "minWordSizefor1Typo": 4,
+        "minWordSizefor2Typos": 8,
+        "ignorePlurals": "true",
+        "advancedSyntax": "true",
+        "page": 0,
+        "hitsPerPage": 10,
+    }
+
+    # Use the Algolia index to search for tweets that match the query
+    results = create_internal_post_search_index().search(query, request_options)
+
+    # Get the tweet IDs from the search results
+    tweet_ids = [result['objectID'] for result in results['hits']]
+
+    # Get the tweets from the database using the tweet IDs
+    tweets = Tweet.get_tweets_by_ids(tweet_ids)
+
+    # Convert the tweets to a dictionary with the tweet ID string as the key
+    tweets_dict = {str(tweet.id): tweet for tweet in tweets}
+
+    tweets = [
+        tweets_dict[tweet_id].to_int_dict() for tweet_id in tweet_ids
+    ]
+
+    # Return the tweets as a JSON response
+    return jsonify(tweets), 200
