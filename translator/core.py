@@ -26,6 +26,7 @@ class TranslatorCore(object):
         "content-based filtering", "sentiment analysis", "topic modeling", "LDA", "word2vec", "GloVe", "fastText",
         "word embedding", "pre-trained model", "pre-trained language model", "pre-trained transformer", "pre-trained BERT",
         "google", "facebook", "amazon", "microsoft", "apple", "ibm", "alibaba", "baidu", "tencent", "huawei",
+        "intel", "nvidia", "tesla", "uber", "airbnb", "netflix", "twitter", "reddit", "youtube", "instagram",
     ]
     title_keys = ['title', 'Title', 'TITLE', '标题',
                   '题目', '摘要', '概要', '標題', '標題名稱', '標題名字']
