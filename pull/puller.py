@@ -9,6 +9,7 @@ from flask import Flask
 from db.conn import db, get_connection
 from db.storage import check_if_object_exists_on_s3, upload_image_to_s3
 from sqlalchemy.exc import IntegrityError
+from gpt_news_feed.search.index import create_internal_post_search_index
 from models.tweet import Tweet
 from models.twitter_user import TwitterUser
 from config.tweet import TweetConfig
@@ -254,19 +255,6 @@ class Puller(object):
             print(f"Duplicate URL found: {tweet['url']}")
         return new_tweet
 
-    # create search index
-    def create_search_index(new_tweet):
-        return ({
-            "objectID": new_tweet.id,
-            "author": new_tweet.author,
-            "title": new_tweet.title,
-            "description": new_tweet.description,
-            "url": new_tweet.url,
-            "url_to_image": new_tweet.url_to_image,
-            "published_at": new_tweet.published_at,
-            "content": new_tweet.content,
-        })
-
     # process image if needed
     def process_image(self, username, profile_image_url, image_set):
         if not profile_image_url:
@@ -323,21 +311,23 @@ class Puller(object):
     def run(self, usernames=[]):
         start_time = time.time()
 
-        if not usernames:
-            usernames = ['elonmusk', 'sama', 'ylecun']
-
         all_tweets = []
         if self.version == 1:
             all_tweets = self.retrieve_tweets_of_users(usernames)
         else:
             all_tweets = self.retrieve_tweets_of_users_v2(usernames)
-        all_tweets_indices = []
-
+        
+        new_tweets = []
         session = get_connection()
         for tweet in all_tweets:
             new_tweet = self.store_tweets_to_database(session, tweet)
+            new_tweets.append(new_tweet)
             print(f"Stored tweet {new_tweet} to database")
         session.close()
 
+        # create search index
+        all_tweets_indices = [tweet.to_index_dict() for tweet in new_tweets]
+        create_internal_post_search_index().save_objects(all_tweets_indices)
+
         elapsed_time = time.time() - start_time
-        print(f"Saved results to database in {elapsed_time:.2f} seconds")
+        print(f"Retrieved {len(all_tweets)} posts in {elapsed_time:.2f} seconds")

@@ -244,9 +244,13 @@ def update_tweet(tweet_id):
                                url_to_image=url_to_image,
                                published_at=published_at,
                                content=content)
-    if tweet.visibility == "public" and (author or display_name or title or description or url or url_to_image or published_at or content):
-        create_post_search_index().delete_object(tweet_id)
-        create_post_search_index().save_object(tweet.to_index_dict())
+    if author or display_name or title or description or url or url_to_image or published_at or content:
+        create_internal_post_search_index().delete_object(tweet_id)
+        create_internal_post_search_index().save_object(tweet.to_index_dict())
+        if tweet.visibility == "public":
+            create_post_search_index().delete_object(tweet_id)
+            create_post_search_index().save_object(tweet.to_index_dict())
+        
     return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
 
 @app.route('/admin/tweets/<int:tweet_id>/lgtm', methods=['PUT'])
