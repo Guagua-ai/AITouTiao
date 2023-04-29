@@ -3,11 +3,10 @@ import requests
 from app import app
 from flask import jsonify, request
 from db.storage import upload_image_to_s3
-from gpt_news_feed.search.index import create_internal_post_search_index
 from models.user import User
 from models.tweet import Tweet
 from modules.utils import admin_required
-from search.index import create_post_search_index, create_user_search_index
+from search.index import create_post_search_index, create_user_search_index, create_internal_post_search_index
 from translator.core import TranslatorCore
 
 
