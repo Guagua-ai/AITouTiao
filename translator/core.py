@@ -38,6 +38,7 @@ class TranslatorCore(object):
         "斯玛·阿尔特曼": "Sam Altman",
         "斯玛·阿尔特曼": "Sam Altman",
         "安德烈·卡帕斯基": "Andrej Karpathy",
+        "聊天GPT": "ChatGPT",
     }
 
     def __init__(self, api_key=None):
