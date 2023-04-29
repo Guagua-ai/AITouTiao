@@ -6,7 +6,7 @@ from modules.utils import admin_required
 usernames = [
             #  'lexfridman',
               'ClementDelangue',
-              'OfficialLoganK'
+              'OfficialLoganK',
             #  'elonmusk',
             #  'sama',
             #  'ylecun',
