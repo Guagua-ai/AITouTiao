@@ -1,1 +1,1 @@
-from .index import create_post_search_index, create_user_search_index
+from .index import create_post_search_index, create_user_search_index, create_internal_post_search_index
