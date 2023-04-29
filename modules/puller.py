@@ -5,13 +5,13 @@ from modules.utils import admin_required
 
 usernames = [
             #  'lexfridman',
-            #  'ClementDelangue',
-            #  'OfficialLoganK'
-              'elonmusk',
+              'ClementDelangue',
+              'OfficialLoganK'
+            #  'elonmusk',
             #  'sama',
             #  'ylecun',
-              'karpathy',
-            #  'goodfellow_ian',
+            #  'karpathy',
+              'goodfellow_ian',
             #  'demishassabis',
             #  'OpenAI',
             #  'DeepMind',
