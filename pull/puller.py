@@ -317,16 +317,16 @@ class Puller(object):
         else:
             all_tweets = self.retrieve_tweets_of_users_v2(usernames)
         
-        new_tweets = []
+        all_tweets_indices = []
         session = get_connection()
         for tweet in all_tweets:
             new_tweet = self.store_tweets_to_database(session, tweet)
-            new_tweets.append(new_tweet)
+            
+            # create search index
+            all_tweets_indices.append(new_tweet.to_index_dict())
             print(f"Stored tweet {new_tweet} to database")
         session.close()
 
-        # create search index
-        all_tweets_indices = [tweet.to_index_dict() for tweet in new_tweets]
         create_internal_post_search_index().save_objects(all_tweets_indices)
 
         elapsed_time = time.time() - start_time
