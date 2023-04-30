@@ -40,7 +40,8 @@ def collect():
 def collect_async():
     jobs = []
     for idx, username in enumerate(usernames):
-        job = fs.enqueue_in(timedelta(minutes=1), PullStep([username]), job_timeout=36000)
+        job = fs.enqueue_in(timedelta(minutes=idx),
+                            PullStep([username]), job_timeout=36000)
         jobs.append(job)
     return jsonify({'Tweets collection started with job_ids': [job.id for job in jobs]}), 202
 
