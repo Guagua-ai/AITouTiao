@@ -166,3 +166,6 @@ pillow==9.5.0
 babel==2.12.1
 aniso8601==9.0.1
 tenacity==8.2.2
+crontab==1.0.1
+freezegun==1.2.2
+rq-scheduler==0.13.0

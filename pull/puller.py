@@ -147,7 +147,10 @@ class Puller(object):
                 user for user in tweets_data['includes']['users'] if user['id'] == raw_tweet['author_id'])
             author_name = user['name']
             author_username = user['username']
-            profile_url = user['profile_image_url']
+        
+            # Get a high-resolution profile image
+            profile_url = user['profile_image_url'].replace('_normal', '')
+            
             twitter_user = TwitterUser.update(username=author_username, display_name=author_name, profile_image_url=profile_url)
             if not twitter_user:
                 raise Exception(
@@ -210,9 +213,13 @@ class Puller(object):
                     description = content
                     if len(content) > 40:
                         description = content[:40] + '...'
-
+                    
+                    # check if twitter user needs update
                     url_to_image = self.process_image(
-                        username=tweet.user.username, profile_image_url=tweet.user.profileImageUrl, image_set=image_set)
+                        username=tweet.user.username, 
+                        profile_image_url=tweet.user.profileImageUrl, 
+                        image_set=image_set)
+                    
                     formatted_tweet = {
                         'source': {
                             'id': tweet.user.id,
@@ -257,9 +264,11 @@ class Puller(object):
 
     # process image if needed
     def process_image(self, username, profile_image_url, image_set):
+        # Check if image is already in S3
         if not profile_image_url:
             return profile_image_url
 
+        # Check if image is already in S3
         if profile_image_url in image_set:
             return profile_image_url
 

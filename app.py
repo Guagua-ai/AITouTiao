@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager
 from flask_redis import FlaskRedis
 from flask_migrate import Migrate
 from workflow import FlowMachine
+from workflow import FlowScheduler
 from translator.core import TranslatorCore
 from chat.chatbot import Chatbot
 from pull.puller import Puller
@@ -46,7 +47,10 @@ redis_store = FlaskRedis(app)
 open_ai_api = os.getenv('OPENAI_API_KEY')
 
 # Create the queue
-q = FlowMachine(connection=os.getenv('REDIS_URL'))
+fm = FlowMachine(connection=os.getenv('REDIS_URL'))
+
+# Create the scheduler
+fs = FlowScheduler(connection=os.getenv('REDIS_URL'))
 
 # Configure SendGrid
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
