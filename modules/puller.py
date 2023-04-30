@@ -2,28 +2,32 @@ import time
 from app import app, puller, fm, fs
 from flask import jsonify
 from steps import PullStep
-from datetime import timedelta
 from modules.utils import admin_required
 
 usernames = [
-             'Ronald_vanLoon',
-             'TerenceLeungSF',
-             'lexfridman',
-             'ClementDelangue',
-             'OfficialLoganK',
-             'elonmusk',
-             'Thom_Wolf',
-             'AndrewYNg',
-             'ID_AA_Carmack',
-             'nigewillson',
-             'sama',
-             'ylecun',
-             'karpathy',
-             'goodfellow_ian',
-             'demishassabis',
-             'OpenAI',
-             'DeepMind',
-            ]
+    'Nicochan33',
+    'sallyeaves',
+    'erikbryn',
+    'antgrasso',
+    'kaggle',
+    'Ronald_vanLoon',
+    'TerenceLeungSF',
+    'lexfridman',
+    'ClementDelangue',
+    'OfficialLoganK',
+    'elonmusk',
+    'Thom_Wolf',
+    'AndrewYNg',
+    'ID_AA_Carmack',
+    'nigewillson',
+    'sama',
+    'ylecun',
+    'karpathy',
+    'goodfellow_ian',
+    'demishassabis',
+    'OpenAI',
+    'DeepMind',
+]
 
 
 @app.route('/admin/collect', methods=['GET'])
