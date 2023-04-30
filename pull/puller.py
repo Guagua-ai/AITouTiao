@@ -26,7 +26,7 @@ class Puller(object):
         self.translator = translator
 
         # Add Twitter API credentials
-        self.version = 2
+        self.version = 1
         self.twitter_bearer_token = os.getenv('TWITTER_BEARER_TOKEN')
 
     # pull tweets from twitter
@@ -161,7 +161,7 @@ class Puller(object):
     # get tweets from a user
     def get_tweets(self, username, max_results):
         tweet_list = []
-        for i, tweet in enumerate(sntwitter.TwitterUserScraper(username).get_items()):
+        for i, tweet in enumerate(sntwitter.TwitterProfileScraper(username).get_items()):
             if i >= max_results:
                 break
 
