@@ -2,38 +2,42 @@ import time
 from app import app, puller, fm, fs
 from flask import jsonify
 from steps import PullStep
-from datetime import timedelta
 from modules.utils import admin_required
 
 usernames = [
-             'ilyasut',
-             'reidhoffman',
-             'peterthiel',
-             'miramurati',
-             'gdb',
-             'chamath',
-             'justinkan',
-             'BigCodeProject',
-             'harm_devries',
-             'paulg',
-             'Ronald_vanLoon',
-             'TerenceLeungSF',
-             'lexfridman',
-             'ClementDelangue',
-             'OfficialLoganK',
-             'elonmusk',
-             'Thom_Wolf',
-             'AndrewYNg',
-             'ID_AA_Carmack',
-             'nigewillson',
-             'sama',
-             'ylecun',
-             'karpathy',
-             'goodfellow_ian',
-             'demishassabis',
-             'OpenAI',
-             'DeepMind',
-            ]
+    'ilyasut',
+    'reidhoffman',
+    'peterthiel',
+    'miramurati',
+    'gdb',
+    'chamath',
+    'justinkan',
+    'BigCodeProject',
+    'harm_devries',
+    'paulg',
+    'Nicochan33',
+    'sallyeaves',
+    'erikbryn',
+    'antgrasso',
+    'kaggle',
+    'Ronald_vanLoon',
+    'TerenceLeungSF',
+    'lexfridman',
+    'ClementDelangue',
+    'OfficialLoganK',
+    'elonmusk',
+    'Thom_Wolf',
+    'AndrewYNg',
+    'ID_AA_Carmack',
+    'nigewillson',
+    'sama',
+    'ylecun',
+    'karpathy',
+    'goodfellow_ian',
+    'demishassabis',
+    'OpenAI',
+    'DeepMind',
+]
 
 
 @app.route('/admin/collect', methods=['GET'])
@@ -49,8 +53,8 @@ def collect():
 @admin_required
 def collect_async():
     jobs = []
-    for idx, username in enumerate(usernames):
-        job = fs.enqueue_in(timedelta(minutes=1), PullStep([username]), job_timeout=36000)
+    for _, username in enumerate(usernames):
+        job = fm.enqueue(PullStep([username]), job_timeout=36000)
         jobs.append(job)
     return jsonify({'Tweets collection started with job_ids': [job.id for job in jobs]}), 202
 

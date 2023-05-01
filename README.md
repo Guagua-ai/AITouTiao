@@ -63,3 +63,9 @@ curl -X GET http://localhost:8080/chat?keyword=keyword
 
 ## Documentation
 
+[TBD]
+
+## License
+
+CopyRight © 2022-2023 [Virtual Dynamic Labs, LLC](https://www.virtualdynamiclabs.xyz/)
+All Rights Reserved.
