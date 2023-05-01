@@ -6,6 +6,16 @@ from datetime import timedelta
 from modules.utils import admin_required
 
 usernames = [
+             'ilyasut',
+             'reidhoffman',
+             'peterthiel',
+             'miramurati',
+             'gdb',
+             'chamath',
+             'justinkan',
+             'BigCodeProject',
+             'harm_devries',
+             'paulg',
              'Ronald_vanLoon',
              'TerenceLeungSF',
              'lexfridman',
