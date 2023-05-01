@@ -368,7 +368,7 @@ def search_posts():
     tweets_dict = {str(tweet.id): tweet for tweet in tweets}
 
     tweets = [
-        tweets_dict[tweet_id].to_int_dict() for tweet_id in tweet_ids
+        tweets_dict[tweet_id].to_int_dict(needs_content=True) for tweet_id in tweet_ids
     ]
 
     # Return the tweets as a JSON response
