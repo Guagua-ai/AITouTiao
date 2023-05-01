@@ -27,9 +27,11 @@ class TwitterUser(db.Model):
     def check_if_needs_update(self):
         return self.display_name == None or self.profile_image_url == None
 
-    def create_user(user_id, username, display_name=None):
-        user = TwitterUser(user_id=user_id, username=username,
-                           display_name=display_name)
+    def create_user(user_id, username, display_name=None, profile_image_url=None):
+        user = TwitterUser(user_id=user_id, 
+                           username=username,
+                           display_name=display_name, 
+                           profile_image_url=profile_image_url)
         db.session.add(user)
         db.session.commit()
         return user

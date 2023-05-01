@@ -100,7 +100,7 @@ class Puller(object):
                         continue
 
                     # check if twitter user needs update
-                    author_name, author_username, profile_url = self.store_twitter_user(
+                    author_name, author_username, profile_url = self.store_twitter_user_v2(
                         username, tweets_data, raw_tweet)
 
                     # generate chinese news feed post
@@ -135,9 +135,31 @@ class Puller(object):
                     formatted_tweets.append(formatted_tweet)
                 all_tweets.extend(formatted_tweets)
         return all_tweets
+    
+    def store_twitter_user(self, username, tweet):
+        twitter_user = TwitterUser.get_user_by_username(username)
+        if twitter_user is not None:
+            return twitter_user
+        
+        author_name = tweet.user.displayname
+        author_username = username
+    
+        # Get a high-resolution profile image
+        profile_url = tweet.user.profileImageUrl.replace('_normal', '')
+        
+        # Create a new Twitter user
+        twitter_user = TwitterUser.create_user(user_id=tweet.user.id,
+                                               username=author_username, 
+                                               display_name=author_name, 
+                                               profile_image_url=profile_url)
+        if not twitter_user:
+            raise Exception(
+                f"Error updating user {author_username}")
+
+        return twitter_user
 
     # create twitter user
-    def store_twitter_user(self, username, tweets_data, raw_tweet):
+    def store_twitter_user_v2(self, username, tweets_data, raw_tweet):
         twitter_user = TwitterUser.get_user_by_username(username)
         if twitter_user is None:
             raise Exception(
@@ -188,10 +210,10 @@ class Puller(object):
             image_set = set()
             for username in usernames:
                 print(f"Fetching tweets from {username}")
-                tweets = self.get_tweets(username, self.config.max_results)
+                tweets_data = self.get_tweets(username, self.config.max_results)
 
                 formatted_tweets = []
-                for tweet in tweets:
+                for tweet in tweets_data:
                     url = f"https://twitter.com/{tweet.user.username}/status/{tweet.id}"
 
                     # check if tweet already exists
@@ -201,6 +223,10 @@ class Puller(object):
                     # check if tweet is related to AI
                     if not self.translator.is_related_to_ai(tweet.rawContent):
                         continue
+
+                    # check if twitter user needs update
+                    author_name, author_username, profile_url = self.store_twitter_user(
+                        username, tweet)
 
                     # generate chinese news feed post
                     title, content = self.translator.generate_chinese_news_feed_post(
@@ -216,8 +242,8 @@ class Puller(object):
                     
                     # check if twitter user needs update
                     url_to_image = self.process_image(
-                        username=tweet.user.username, 
-                        profile_image_url=tweet.user.profileImageUrl, 
+                        username=author_username, 
+                        profile_image_url=profile_url, 
                         image_set=image_set)
                     
                     formatted_tweet = {
@@ -225,8 +251,8 @@ class Puller(object):
                             'id': tweet.user.id,
                             'name': "Twitter",
                         },
-                        'author': tweet.user.username,
-                        "displayname": tweet.user.displayname,
+                        'author': author_username,
+                        "displayname": author_name,
                         'title': title,
                         'description': description,
                         'url': url,
@@ -275,10 +301,6 @@ class Puller(object):
         # Check if image is already in S3
         if "s3.amazonaws.com" in profile_image_url:
             return profile_image_url
-        
-        # Get the high resolution profile image
-        if "normal" in profile_image_url:
-            profile_image_url = profile_image_url.replace('_normal', '')
 
         # Get the bucket key and object key
         bucket_key = 'server-news-tweet-photo'
