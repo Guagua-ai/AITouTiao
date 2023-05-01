@@ -275,6 +275,10 @@ class Puller(object):
         # Check if image is already in S3
         if "s3.amazonaws.com" in profile_image_url:
             return profile_image_url
+        
+        # Get the high resolution profile image
+        if "normal" in profile_image_url:
+            profile_image_url = profile_image_url.replace('_normal', '')
 
         # Get the bucket key and object key
         bucket_key = 'server-news-tweet-photo'
