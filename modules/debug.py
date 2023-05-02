@@ -25,12 +25,8 @@ def collect_log():
 
 
 def save_log(stack_trace):
-    # Get the home directory
-    home_dir = os.path.expanduser('~')
-    
-    # Create the file path
-    log_file_path = os.path.join(home_dir, 'crash_log.txt')
-    
+    log_file_path = 'crash_log.txt'
+
     # Check if the file exists, and create it if it doesn't
     if not os.path.exists(log_file_path):
         with open(log_file_path, 'w') as log_file:
