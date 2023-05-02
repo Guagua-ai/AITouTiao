@@ -7,6 +7,8 @@ def collect_log():
     '''
     This endpoint receives a crash log from the client and saves it to a file.
     '''
+    print('Received crash log')
+    print(request)
     log_data = request.get_json()
 
     if not log_data:
