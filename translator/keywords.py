@@ -1,0 +1,47 @@
+ai_keywords = [
+    "AI", "artificial intelligence", "GPT", "OpenAI", "machine learning", "deep learning", "neural network",
+    "natural language processing", "NLP", "computer vision", "reinforcement learning", "supervised learning",
+    "unsupervised learning", "transfer learning", "generative model", "chatbot", "robotics", "automation",
+    "algorithm", "data science", "big data", "predictive analytics", "GAN", "generative adversarial network",
+    "convolutional neural network", "CNN", "RNN", "recurrent neural network", "transformer", "BERT", "language model",
+    "image recognition", "object detection", "semantic segmentation", "self-driving car", "autonomous vehicle",
+    "virtual assistant", "Siri", "Alexa", "Google Assistant", "Cortana", "TensorFlow", "Keras", "PyTorch", "MXNet",
+    "scikit-learn", "data mining", "feature extraction", "dimensionality reduction", "PCA", "t-SNE",
+    "gradient descent", "backpropagation", "optimization", "loss function", "activation function", "ReLU",
+    "sigmoid", "tanh", "softmax", "dropout", "regularization", "overfitting", "underfitting", "bias-variance tradeoff",
+    "cross-validation", "hyperparameter tuning", "grid search", "random search", "Bayesian optimization",
+    "ensemble learning", "bagging", "boosting", "stacking", "decision tree", "random forest", "XGBoost",
+    "LightGBM", "CatBoost", "SVM", "support vector machine", "k-means", "clustering", "dbscan", "hierarchical clustering",
+    "classification", "regression", "time series", "anomaly detection", "recommendation system", "collaborative filtering",
+    "content-based filtering", "sentiment analysis", "topic modeling", "LDA", "word2vec", "GloVe", "fastText",
+    "word embedding", "pre-trained model", "pre-trained language model", "pre-trained transformer", "pre-trained BERT",
+    "google", "facebook", "amazon", "microsoft", "apple", "ibm", "alibaba", "baidu", "tencent", "huawei",
+    "intel", "nvidia", "tesla", "uber", "airbnb", "netflix", "twitter", "reddit", "youtube", "instagram",
+    "deepmind", "openai", "facebook ai research", "microsoft research", "google brain", "google research",
+    "google x", "amazon web services", "alibaba cloud", "tencent cloud", "huawei cloud", "ibm watson",
+    "ibm research", "intel labs", "nvidia research", "tesla autopilot", "uber ai labs", "airbnb engineering",
+    "netflix technology blog", "twitter engineering", "reddit engineering", "youtube engineering",
+]
+
+non_translatable_terms = {
+    "深度思维": "DeepMind",
+    "斯玛·阿尔特曼": "山姆·阿尔特曼",
+    "Sam Altman": "山姆·阿尔特曼",
+    "安德烈·卡帕斯基": "Andrej Karpathy",
+    "聊天GPT": "ChatGPT",
+    "Yann Lecun": "杨立昆",
+    "Andrew Ng": "吴恩达",
+    "Geoffrey Hinton": "杰弗里·辛顿",
+    "Yoshua Bengio": "尤金·本吉奥",
+    "Ian Goodfellow": "伊恩·古德费洛",
+    "François Chollet": "弗朗索瓦·肖莱",
+    "埃隆·马斯克": "马斯克",
+    "Elon Musk": "马斯克",
+    "马克·扎克伯格": "扎克伯格",
+    "杰夫·贝索斯": "贝索斯",
+}
+
+title_keys = ['title', 'Title', 'TITLE', '标题',
+                '题目', '摘要', '概要', '標題', '標題名稱', '標題名字']
+content_keys = ['content', 'Content', 'CONTENT', '内容',
+                '正文', '正文内容', '正文摘要', '正文概要', '內容', '內容摘要', '內容概要']

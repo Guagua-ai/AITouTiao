@@ -5,52 +5,11 @@ from config.translator import TranslatorConfig
 from utils.parser import find_first_index
 from .rate_limiter import RateLimiter
 from .api import create_chat_completion
+from .keywords import ai_keywords, non_translatable_terms, title_keys, content_keys
 
 class TranslatorCore(object):
     ''' Translator class '''
     config = None
-    ai_keywords = [
-        "AI", "artificial intelligence", "GPT", "OpenAI", "machine learning", "deep learning", "neural network",
-        "natural language processing", "NLP", "computer vision", "reinforcement learning", "supervised learning",
-        "unsupervised learning", "transfer learning", "generative model", "chatbot", "robotics", "automation",
-        "algorithm", "data science", "big data", "predictive analytics", "GAN", "generative adversarial network",
-        "convolutional neural network", "CNN", "RNN", "recurrent neural network", "transformer", "BERT", "language model",
-        "image recognition", "object detection", "semantic segmentation", "self-driving car", "autonomous vehicle",
-        "virtual assistant", "Siri", "Alexa", "Google Assistant", "Cortana", "TensorFlow", "Keras", "PyTorch", "MXNet",
-        "scikit-learn", "data mining", "feature extraction", "dimensionality reduction", "PCA", "t-SNE",
-        "gradient descent", "backpropagation", "optimization", "loss function", "activation function", "ReLU",
-        "sigmoid", "tanh", "softmax", "dropout", "regularization", "overfitting", "underfitting", "bias-variance tradeoff",
-        "cross-validation", "hyperparameter tuning", "grid search", "random search", "Bayesian optimization",
-        "ensemble learning", "bagging", "boosting", "stacking", "decision tree", "random forest", "XGBoost",
-        "LightGBM", "CatBoost", "SVM", "support vector machine", "k-means", "clustering", "dbscan", "hierarchical clustering",
-        "classification", "regression", "time series", "anomaly detection", "recommendation system", "collaborative filtering",
-        "content-based filtering", "sentiment analysis", "topic modeling", "LDA", "word2vec", "GloVe", "fastText",
-        "word embedding", "pre-trained model", "pre-trained language model", "pre-trained transformer", "pre-trained BERT",
-        "google", "facebook", "amazon", "microsoft", "apple", "ibm", "alibaba", "baidu", "tencent", "huawei",
-        "intel", "nvidia", "tesla", "uber", "airbnb", "netflix", "twitter", "reddit", "youtube", "instagram",
-    ]
-    title_keys = ['title', 'Title', 'TITLE', '标题',
-                  '题目', '摘要', '概要', '標題', '標題名稱', '標題名字']
-    content_keys = ['content', 'Content', 'CONTENT', '内容',
-                    '正文', '正文内容', '正文摘要', '正文概要', '內容', '內容摘要', '內容概要']
-
-    non_translatable_terms = {
-        "深度思维": "DeepMind",
-        "斯玛·阿尔特曼": "山姆·阿尔特曼",
-        "Sam Altman": "山姆·阿尔特曼",
-        "安德烈·卡帕斯基": "Andrej Karpathy",
-        "聊天GPT": "ChatGPT",
-        "Yann Lecun": "杨立昆",
-        "Andrew Ng": "吴恩达",
-        "Geoffrey Hinton": "杰弗里·辛顿",
-        "Yoshua Bengio": "尤金·本吉奥",
-        "Ian Goodfellow": "伊恩·古德费洛",
-        "François Chollet": "弗朗索瓦·肖莱",
-        "埃隆·马斯克": "马斯克",
-        "Elon Musk": "马斯克",
-        "马克·扎克伯格": "扎克伯格",
-        "杰夫·贝索斯": "贝索斯",
-    }
 
     def __init__(self, api_key=None):
         assert api_key is not None, 'API key is required'
@@ -61,7 +20,7 @@ class TranslatorCore(object):
 
     def is_related_to_ai(self, text):
         # Check if the text contains any of these AI-related keywords
-        for keyword in self.ai_keywords:
+        for keyword in ai_keywords:
             if keyword.lower() in text.lower():
                 return True
         return False
@@ -97,9 +56,6 @@ class TranslatorCore(object):
         tokens_required = self.config.translation_max_tokens
         self.rate_limiter.rate_limit(tokens_required)
 
-        # Replace the following line
-        # response = openai.ChatCompletion.create(
-        # with this custom method to make the API request
         response = create_chat_completion(
             api_key=openai.api_key,
             model=self.config.translation_model,
@@ -109,7 +65,6 @@ class TranslatorCore(object):
         news_feed_post = response['choices'][0]['message']['content'].strip()
         print(news_feed_post)
         return self.parse_response(news_feed_post)
-    
 
     def parse_response(self, response, count=0):
         ''' Parse the response to title and content '''
@@ -125,13 +80,13 @@ class TranslatorCore(object):
     def jsonify(self, raw_string):
         ''' Parse the raw string to title and content '''
         title_start_index = find_first_index(
-            raw_string, self.title_keys) + len("：")
+            raw_string, title_keys) + len("：")
         title_end_index = raw_string.find("\n", title_start_index)
         title = raw_string[title_start_index:title_end_index].rstrip(
             ".,!?:;。！？：；").strip()
 
         content_start_index = find_first_index(
-            raw_string, self.content_keys) + len("：")
+            raw_string, content_keys) + len("：")
         content = raw_string[content_start_index:].strip()
 
         data = {"title": title, "content": content}
@@ -139,14 +94,14 @@ class TranslatorCore(object):
 
     def parse(self, processed_json):
         ''' Parse the json to title and content '''
-        for key in self.title_keys:
+        for key in title_keys:
             if key in processed_json:
                 title = processed_json[key]
                 break
         else:
             title = None
 
-        for key in self.content_keys:
+        for key in content_keys:
             if key in processed_json:
                 content = processed_json[key]
                 break
@@ -161,8 +116,8 @@ class TranslatorCore(object):
         simplified_text = cc.convert(text)
 
         # Replace non-translatable terms
-        for term in self.non_translatable_terms:
+        for term in non_translatable_terms:
             simplified_text = simplified_text.replace(
-                term, self.non_translatable_terms[term])
+                term, non_translatable_terms[term])
 
         return simplified_text

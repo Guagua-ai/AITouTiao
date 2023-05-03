@@ -191,7 +191,6 @@ class Puller(object):
     def get_tweets(self, username, max_results):
         tweet_list = []
         for i, tweet in enumerate(sntwitter.TwitterProfileScraper(username).get_items()):
-            print(f"Fetching tweet {i} from {username}")
             print(tweet)
             if i >= max_results:
                 break
