@@ -94,8 +94,12 @@ def download_tweet_images():
             continue
 
         if url_to_image and url_to_image not in url_set:
+            url_to_hd_image = url_to_image
+            if '_normal' in url_to_image:
+                url_to_hd_image = url_to_image.replace('_normal', '')
+
             # Download image from URL
-            response = requests.get(url_to_image)
+            response = requests.get(url_to_hd_image)
             if response.status_code != 200:
                 continue
             image_data = response.content
