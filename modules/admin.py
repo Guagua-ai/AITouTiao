@@ -2,6 +2,8 @@ import os
 import requests
 from app import app
 from flask import jsonify, request
+from billing.api import get_daily_usage
+from billing.server import get_daily_aws_cost
 from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
@@ -377,3 +379,15 @@ def search_posts():
 
     # Return the tweets as a JSON response
     return jsonify(tweets), 200
+
+@app.route('/admin/billing', methods=['GET'])
+@admin_required
+def get_billing():
+    """
+    Get billing information.
+    """
+    usage = get_daily_aws_cost()
+    if usage:
+        return jsonify({"daily usage": usage}), 200
+    else:
+        return jsonify({"error": "Failed to fetch billing information"}), 500

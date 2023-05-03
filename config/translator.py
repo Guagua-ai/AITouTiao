@@ -4,6 +4,7 @@ import configparser
 class TranslatorConfig(object):
     config = None
     translation_engine = None
+    translation_model = None
     translation_max_tokens = None
     translation_n = None
     translation_stop = None
@@ -16,6 +17,7 @@ class TranslatorConfig(object):
 
         # Read the translation settings from the config file
         self.translation_engine = self.config.get('translation', 'engine')
+        self.translation_model = self.config.get('translation', 'model')
         self.translation_max_tokens = self.config.getint(
             'translation', 'max_tokens')
         self.translation_n = self.config.getint('translation', 'n')

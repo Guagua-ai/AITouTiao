@@ -5,6 +5,12 @@ from steps import PullStep
 from modules.utils import admin_required
 
 usernames = [
+    'huggingface',
+    'julien_c',
+    'JeffDean',
+    'GoogleAI',
+    'MetaAI',
+    'geoffreyhinton',
     'mcuban',
     'johnschulman2',
     'ilyasut',
@@ -55,9 +61,11 @@ def collect():
 @admin_required
 def collect_async():
     jobs = []
-    for _, username in enumerate(usernames):
-        job = fm.enqueue(PullStep([username]), job_timeout=36000)
-        jobs.append(job)
+    # for _, username in enumerate(usernames):
+    #     job = fm.enqueue(PullStep([username]), job_timeout=36000)
+    #     jobs.append(job)
+    job = fm.enqueue(PullStep(usernames), job_timeout=36000)
+    jobs.append(job)
     return jsonify({'Tweets collection started with job_ids': [job.id for job in jobs]}), 202
 
 

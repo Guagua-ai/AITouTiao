@@ -3,7 +3,8 @@ import openai
 from opencc import OpenCC
 from config.translator import TranslatorConfig
 from utils.parser import find_first_index
-
+from .rate_limiter import RateLimiter
+from .api import create_chat_completion
 
 class TranslatorCore(object):
     ''' Translator class '''
@@ -35,29 +36,28 @@ class TranslatorCore(object):
 
     non_translatable_terms = {
         "深度思维": "DeepMind",
-        "斯玛·阿尔特曼": "Sam Altman",
-        "斯玛·阿尔特曼": "Sam Altman",
+        "斯玛·阿尔特曼": "山姆·阿尔特曼",
+        "Sam Altman": "山姆·阿尔特曼",
         "安德烈·卡帕斯基": "Andrej Karpathy",
         "聊天GPT": "ChatGPT",
+        "Yann Lecun": "杨立昆",
+        "Andrew Ng": "吴恩达",
+        "Geoffrey Hinton": "杰弗里·辛顿",
+        "Yoshua Bengio": "尤金·本吉奥",
+        "Ian Goodfellow": "伊恩·古德费洛",
+        "François Chollet": "弗朗索瓦·肖莱",
+        "埃隆·马斯克": "马斯克",
+        "Elon Musk": "马斯克",
+        "马克·扎克伯格": "扎克伯格",
+        "杰夫·贝索斯": "贝索斯",
     }
 
     def __init__(self, api_key=None):
         assert api_key is not None, 'API key is required'
         openai.api_key = api_key
+        self.rate_limiter = RateLimiter(requests_per_minute_limit=200, tokens_per_minute_limit=40000)
         self.config = TranslatorConfig()
-
-    def translate_to_chinese(self, text):
-        response = openai.Completion.create(
-            engine=self.config.translation_engine,
-            prompt=f"Translate the following English text to Simplified Chinese: '{text}'",
-            max_tokens=self.config.translation_max_tokens,
-            n=self.config.translation_n,
-            stop=None,
-            temperature=self.config.translation_temperature,
-        )
-
-        translation = response.choices[0].text.strip()
-        return translation
+        self.version = 2
 
     def is_related_to_ai(self, text):
         # Check if the text contains any of these AI-related keywords
@@ -65,12 +65,20 @@ class TranslatorCore(object):
             if keyword.lower() in text.lower():
                 return True
         return False
-
+    
     def generate_chinese_news_feed_post(self, author, text):
+        if self.version == 1:
+            return self.generate_v1(author, text)
+        elif self.version == 2:
+            return self.generate_v2(author, text)
+        else:
+            raise Exception("Invalid version number")
+
+    def generate_v1(self, author, text):
         ''' Generate a Chinese news feed post '''
         response = openai.Completion.create(
             engine=self.config.translation_engine,
-            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (capped under 600 Chinese characters, remove all urls and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
+            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (remove all urls and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
             max_tokens=self.config.translation_max_tokens,
             n=self.config.translation_n,
             stop=None,
@@ -80,6 +88,28 @@ class TranslatorCore(object):
         news_feed_post = response.choices[0].text.strip()
         print(news_feed_post)
         return self.parse_response(news_feed_post)
+
+    def generate_v2(self, author, text):
+        ''' Generate a Chinese news feed post using GPT-4 chat model '''
+        messages = [
+            {"role": "user", "content": f"Translate this tweet into a Chinese news feed post. The author is '{author}', and the tweet text is '{text}'. Please remove all URLs, do not translate human names, and provide the response as a JSON object with two fields: 'title' and 'content'."}
+        ]
+        tokens_required = self.config.translation_max_tokens
+        self.rate_limiter.rate_limit(tokens_required)
+
+        # Replace the following line
+        # response = openai.ChatCompletion.create(
+        # with this custom method to make the API request
+        response = create_chat_completion(
+            api_key=openai.api_key,
+            model=self.config.translation_model,
+            messages=messages
+        )
+
+        news_feed_post = response['choices'][0]['message']['content'].strip()
+        print(news_feed_post)
+        return self.parse_response(news_feed_post)
+    
 
     def parse_response(self, response, count=0):
         ''' Parse the response to title and content '''

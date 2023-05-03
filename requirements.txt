@@ -169,3 +169,11 @@ tenacity==8.2.2
 crontab==1.0.1
 freezegun==1.2.2
 rq-scheduler==0.13.0
+dataclasses-json==0.5.7
+langchain==0.0.157
+marshmallow-enum==1.5.1
+mypy-extensions==1.0.0
+numexpr==2.8.4
+openapi-schema-pydantic==1.2.4
+pydantic==1.10.7
+typing-inspect==0.8.0
