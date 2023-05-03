@@ -136,7 +136,7 @@ class Puller(object):
                 all_tweets.extend(formatted_tweets)
         return all_tweets
     
-    def store_twitter_user(self, username, tweet):
+    def store_twitter_user(self, username, tweet, image_set):
         twitter_user = TwitterUser.get_user_by_username(username)
         if twitter_user is not None:
             return twitter_user.display_name, twitter_user.username, twitter_user.profile_image_url
@@ -146,6 +146,13 @@ class Puller(object):
     
         # Get a high-resolution profile image
         profile_url = tweet.user.profileImageUrl.replace('_normal', '')
+        
+                    
+        # check if twitter user needs update
+        url_to_image = self.process_image(
+            username=author_username, 
+            profile_image_url=profile_url, 
+            image_set=image_set)
         
         # Create a new Twitter user
         twitter_user = TwitterUser.create_user(user_id=tweet.user.id,
@@ -226,7 +233,7 @@ class Puller(object):
 
                     # check if twitter user needs update
                     author_name, author_username, profile_url = self.store_twitter_user(
-                        username, tweet)
+                        username, tweet, image_set)
 
                     # generate chinese news feed post
                     title, content = self.translator.generate_chinese_news_feed_post(
@@ -240,12 +247,6 @@ class Puller(object):
                     if len(content) > 40:
                         description = content[:40] + '...'
                     
-                    # check if twitter user needs update
-                    url_to_image = self.process_image(
-                        username=author_username, 
-                        profile_image_url=profile_url, 
-                        image_set=image_set)
-                    
                     formatted_tweet = {
                         'source': {
                             'id': tweet.user.id,
@@ -256,7 +257,7 @@ class Puller(object):
                         'title': title,
                         'description': description,
                         'url': url,
-                        'urlToImage': url_to_image,
+                        'urlToImage': profile_url,
                         'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                         'content': content,
                     }
