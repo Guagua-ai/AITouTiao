@@ -1,5 +1,6 @@
 import json
 import openai
+import re
 from opencc import OpenCC
 from config.translator import TranslatorConfig
 from utils.parser import find_first_index
@@ -62,8 +63,11 @@ class TranslatorCore(object):
             messages=messages
         )
 
-        news_feed_post = response['choices'][0]['message']['content'].strip()
-        print(news_feed_post)
+        print(response)
+        try:
+            news_feed_post = response['choices'][0]['message']['content'].strip()
+        except KeyError:
+            news_feed_post = response['choices'][0]['text'].strip()
         return self.parse_response(news_feed_post)
 
     def parse_response(self, response, count=0):
@@ -108,7 +112,7 @@ class TranslatorCore(object):
         else:
             content = None
 
-        return self.purify_text(title), self.purify_text(content)
+        return self.clean_title(title), self.clean_content(content)
 
     def purify_text(self, text):
         ''' Purify the text to simplified Chinese '''
@@ -121,3 +125,28 @@ class TranslatorCore(object):
                 term, non_translatable_terms[term])
 
         return simplified_text
+    
+    def clean_title(self, title):
+        ''' Clean the title '''
+        title = self.purify_text(title)
+
+        # Define a set of unwanted characters to remove from the beginning and end of the title
+        unwanted_chars = ' .,:;!?。：；！？"“”‘’'
+
+        # Remove leading and trailing unwanted characters
+        title = title.strip(unwanted_chars)
+
+        return title
+
+    def clean_content(self, content):
+        ''' Clean the content '''
+        content = self.purify_text(content)
+
+        # Define a regular expression pattern to match unwanted characters at the head and tail
+        pattern = r'^[ .,:;!?。：；！？"“”‘’\n]+|[ .,:;!?。：；！？"“”‘’\n]+$'
+
+        # Use re.sub to remove unwanted characters from the head and tail of the content
+        cleaned_content = re.sub(pattern, '', content)
+
+        return cleaned_content
+
