@@ -139,7 +139,7 @@ class Puller(object):
     def store_twitter_user(self, username, tweet):
         twitter_user = TwitterUser.get_user_by_username(username)
         if twitter_user is not None:
-            return twitter_user
+            return twitter_user.display_name, twitter_user.username, twitter_user.profile_image_url
         
         author_name = tweet.user.displayname
         author_username = username
@@ -156,7 +156,7 @@ class Puller(object):
             raise Exception(
                 f"Error updating user {author_username}")
 
-        return twitter_user
+        return twitter_user.name, twitter_user.username, twitter_user.profile_image_url
 
     # create twitter user
     def store_twitter_user_v2(self, username, tweets_data, raw_tweet):
