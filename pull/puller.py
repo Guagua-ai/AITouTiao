@@ -163,7 +163,7 @@ class Puller(object):
             raise Exception(
                 f"Error updating user {author_username}")
 
-        return twitter_user.displayname, twitter_user.username, twitter_user.profile_image_url
+        return twitter_user.display_name, twitter_user.username, twitter_user.profile_image_url
 
     # create twitter user
     def store_twitter_user_v2(self, username, tweets_data, raw_tweet):
