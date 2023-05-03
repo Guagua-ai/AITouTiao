@@ -1,3 +1,4 @@
+import os
 from flask import jsonify, request
 from app import app
 
@@ -7,6 +8,7 @@ def collect_log():
     '''
     This endpoint receives a crash log from the client and saves it to a file.
     '''
+    print('Received crash log')
     log_data = request.get_json()
 
     if not log_data:
@@ -23,7 +25,14 @@ def collect_log():
 
 
 def save_log(stack_trace):
-    # Implement saving the log data, e.g., to a file or a database
-    with open('~/crash_log.txt', 'a') as log_file:
+    log_file_path = 'crash_log.txt'
+
+    # Check if the file exists, and create it if it doesn't
+    if not os.path.exists(log_file_path):
+        with open(log_file_path, 'w') as log_file:
+            pass
+
+    # Save the log data to the file
+    with open(log_file_path, 'a') as log_file:
         log_file.write(stack_trace)
         log_file.write('\n\n')
