@@ -52,7 +52,7 @@ class TranslatorCore(object):
     def generate_v2(self, author, text):
         ''' Generate a Chinese news feed post using GPT-4 chat model '''
         messages = [
-            {"role": "user", "content": f"Translate this tweet into a Chinese news feed post. The author is '{author}', and the tweet text is '{text}'. Please remove all URLs, do not translate human names, and provide the response as a JSON object with two fields: 'title' and 'content'."}
+            {"role": "user", "content": f"Translate this tweet into a Chinese news feed post. The author is {author}, and the tweet text is {text}. Please remove all URLs, do not translate human names, and provide the response as a JSON object with two fields: 'title' and 'content'."}
         ]
         tokens_required = self.config.translation_max_tokens
         self.rate_limiter.rate_limit(tokens_required)
