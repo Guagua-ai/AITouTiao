@@ -19,8 +19,10 @@ ai_keywords = [
     "intel", "nvidia", "tesla", "uber", "airbnb", "netflix", "twitter", "reddit", "youtube", "instagram",
     "deepmind", "openai", "facebook ai research", "microsoft research", "google brain", "google research",
     "google x", "amazon web services", "alibaba cloud", "tencent cloud", "huawei cloud", "ibm watson",
-    "ibm research", "intel labs", "nvidia research", "tesla autopilot", "uber ai labs", "airbnb engineering",
-    "netflix technology blog", "twitter engineering", "reddit engineering", "youtube engineering",
+    "ibm research", "intel labs", "nvidia research", "tesla autopilot", "uber ai labs", 'technology'
+    'techcrunch', 'venturebeat', 'wired', 'the verge', 'the next web', 'forbes', 'fortune', 'bloomberg',
+    'technology review', 'mit news', 'mit technology review', 'ieee spectrum', 'ieee spectrum robotics',
+    'ieee spectrum automation', 'ieee spectrum ai', 'ieee spectrum machine learning', 'ieee spectrum deep learning',
 ]
 
 non_translatable_terms = {
