@@ -31,6 +31,7 @@ non_translatable_terms = {
     "Sam Altman": "山姆·阿尔特曼",
     "安德烈·卡帕斯基": "Andrej Karpathy",
     "聊天GPT": "ChatGPT",
+    "LeCun": "杨立昆",
     "Yann Lecun": "杨立昆",
     "Yann LeCun": "杨立昆",
     "尹乐昆": "杨立昆",
