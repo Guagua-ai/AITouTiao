@@ -96,8 +96,8 @@ class Puller(object):
                         continue
 
                     # check if tweet is related to AI
-                    if not self.translator.is_related_to_ai(raw_tweet['text']):
-                        continue
+                    # if not self.translator.is_related_to_ai(raw_tweet['text']):
+                    #     continue
 
                     # check if twitter user needs update
                     author_name, author_username, profile_url = self.store_twitter_user_v2(
@@ -229,8 +229,8 @@ class Puller(object):
                         continue
 
                     # check if tweet is related to AI
-                    if not self.translator.is_related_to_ai(tweet.rawContent):
-                        continue
+                    # if not self.translator.is_related_to_ai(tweet.rawContent):
+                    #     continue
 
                     # check if twitter user needs update
                     author_name, author_username, profile_url = self.store_twitter_user(
