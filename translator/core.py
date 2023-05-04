@@ -38,7 +38,7 @@ class TranslatorCore(object):
         ''' Generate a Chinese news feed post '''
         response = openai.Completion.create(
             engine=self.config.translation_engine,
-            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (remove all urls and don't translate human names) for tweet from '{author}': '{text}' Response must be a json with two fields. First field is title and second field is content.",
+            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (remove all urls and don't translate human names) for tweet from {author}: {text} Response must be a json with two fields. First field is title and second field is content.",
             max_tokens=self.config.translation_max_tokens,
             n=self.config.translation_n,
             stop=None,
