@@ -432,7 +432,15 @@ def rewrite():
     if not tweet:
         return jsonify({'message': 'Tweet not found'}), 404
 
+    if tweet.raw_content:
+        return jsonify({'message': 'Cannot rewrite old tweets without raw content'}), 400
+
     translator = TranslatorCore(os.getenv('OPENAI_API_KEY'))
-    updated_content = translator.rewrite_text(tweet.content)
-    Tweet.update_tweet(tweet_id, content=updated_content)
-    return jsonify({'message': 'Tweet rewritten successfully'}), 200
+    title, content = translator.generate_chinese_news_feed_post(
+        tweet.display_name, tweet.raw_content)
+    Tweet.update_tweet(tweet_id, title=title, content=content)
+    return jsonify({
+        'message': 'Tweet rewritten successfully',
+        'title': title,
+        'content': content
+    }), 200
