@@ -194,15 +194,18 @@ class Puller(object):
             print(tweet)
             if i >= max_results:
                 break
-
-            # Use inReplyToTweetId instead of inReplyToStatusId
-            if not tweet.inReplyToTweetId and '@' not in tweet.rawContent:
-                try:
-                    url = urllib.parse.urlparse(tweet.rawContent)
-                    if not (url.scheme and url.netloc):
+            
+            try:
+                # Use inReplyToTweetId instead of inReplyToStatusId
+                if not tweet.inReplyToTweetId and '@' not in tweet.rawContent:
+                    try:
+                        url = urllib.parse.urlparse(tweet.rawContent)
+                        if not (url.scheme and url.netloc):
+                            tweet_list.append(tweet)
+                    except ValueError:
                         tweet_list.append(tweet)
-                except ValueError:
-                    tweet_list.append(tweet)
+            except AttributeError:
+                continue
 
         return tweet_list
 
