@@ -206,6 +206,7 @@ def create_tweet():
     url = data.get('url')
     url_to_image = data.get('urlToImage')
     content = data.get('content')
+    raw_content = data.get('rawContent')
 
     if not all([source_id, source_name, author, displayname, title, description, url, url_to_image, content]):
         return jsonify({'message': 'Missing required fields'}), 400
@@ -219,7 +220,9 @@ def create_tweet():
         description=description,
         url=url,
         url_to_image=url_to_image,
-        content=content)
+        content=content,
+        raw_content=raw_content,
+    )
 
     if tweet.visibility == 'public':
         create_post_search_index().add_object(tweet.to_index_dict())
@@ -409,3 +412,27 @@ def get_billing():
         return jsonify({"daily usage": usage}), 200
     else:
         return jsonify({"error": "Failed to fetch billing information"}), 500
+
+
+@app.route('/admin/rewrite', methods=['POST'])
+@admin_required
+def rewrite():
+    """
+    Rewrite the content of a tweet.
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'No data provided'}), 400
+
+    tweet_id = data.get('tweet_id')
+    if not tweet_id:
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    translator = TranslatorCore(os.getenv('OPENAI_API_KEY'))
+    updated_content = translator.rewrite_text(tweet.content)
+    Tweet.update_tweet(tweet_id, content=updated_content)
+    return jsonify({'message': 'Tweet rewritten successfully'}), 200

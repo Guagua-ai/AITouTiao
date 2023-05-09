@@ -24,6 +24,7 @@ class Tweet(db.Model):
     published_at = Column(DateTime)
     created_at = Column(DateTime)
     content = Column(String)
+    raw_content = Column(String)
     content_type = Column(String, default="text")
     visibility = Column(String, default="private")
 
@@ -53,6 +54,7 @@ class Tweet(db.Model):
             'published_at': self.published_at,
             'created_at': self.created_at,
             'content': self.content,
+            'raw_content': self.raw_content,
             'num_likes': self.num_likes,
             'content_type': self.content_type,
             'visibility': self.visibility,
@@ -75,6 +77,7 @@ class Tweet(db.Model):
             'publishedAt': self.published_at,
             'createdAt': self.created_at,
             'content': self.content if needs_content else '',
+            'rawContent': self.raw_content if needs_content else '',
             'images': [],
             'numLike': self.num_likes,
             'isLiked': False,
@@ -150,7 +153,7 @@ class Tweet(db.Model):
     def count_tweets():
         return Tweet.query.count()
 
-    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, content, published_at=datetime.now(), content_type='text', visibility='private'):
+    def add_tweet(source_id, source_name, author, display_name, title, description, url, url_to_image, content, raw_content, published_at=datetime.now(), content_type='text', visibility='private'):
         new_tweet = Tweet(source_id=source_id,
                           source_name=source_name,
                           author=author,
@@ -161,6 +164,7 @@ class Tweet(db.Model):
                           url_to_image=url_to_image,
                           published_at=published_at,
                           created_at=datetime.now(),
+                          raw_content=raw_content,
                           content=content,
                           content_type=content_type,
                           visibility=visibility)

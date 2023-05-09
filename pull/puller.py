@@ -115,8 +115,12 @@ class Puller(object):
                     if len(content) > 40:
                         description = content[:40] + '...'
 
+                    # process image if needed
                     url_to_image = self.process_image(
-                        username=author_username, profile_image_url=profile_url, image_set=image_set)
+                        username=author_username,
+                        profile_image_url=profile_url,
+                        image_set=image_set)
+
                     formatted_tweet = {
                         'source': {
                             'id': raw_tweet['author_id'],
@@ -130,6 +134,7 @@ class Puller(object):
                         'urlToImage': url_to_image,
                         'publishedAt': raw_tweet['created_at'],
                         'content': content,
+                        'rawContent': raw_tweet['text'],
                     }
 
                     formatted_tweets.append(formatted_tweet)
@@ -264,6 +269,7 @@ class Puller(object):
                         'urlToImage': profile_url,
                         'publishedAt': tweet.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                         'content': content,
+                        'rawContent': tweet.rawContent,
                     }
 
                     formatted_tweets.append(formatted_tweet)
@@ -284,6 +290,7 @@ class Puller(object):
             published_at=tweet['publishedAt'],
             created_at=time.strftime('%Y-%m-%d %H:%M:%S'),
             content=tweet['content'],
+            raw_content=tweet['rawContent'],
         )
         session.add(new_tweet)
         try:
