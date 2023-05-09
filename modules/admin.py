@@ -324,6 +324,7 @@ def delete_tweet(tweet_id):
 
     if tweet.visibility == 'public':
         create_post_search_index().delete_object(tweet.id)
+        create_internal_post_search_index().delete_object(tweet.id)
     tweet.delete()
     return jsonify({'message': 'Tweet deleted successfully'}), 200
 
