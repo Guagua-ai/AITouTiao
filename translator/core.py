@@ -148,5 +148,12 @@ class TranslatorCore(object):
         # Use re.sub to remove unwanted characters from the head and tail of the content
         cleaned_content = re.sub(pattern, '', content)
 
+        # Remove " and } at the end of content
+        cleaned_content = re.sub(r'["}]+\s*$', '', cleaned_content)
+
+        # Make sure there is only one punctuation mark at the end of the content
+        final_punctuation = r'[。！？]+'
+        cleaned_content = re.sub(final_punctuation, '。', cleaned_content.rstrip('。！？')) + "。"
+
         return cleaned_content
 
