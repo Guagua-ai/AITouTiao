@@ -438,7 +438,6 @@ def rewrite():
     translator = TranslatorCore(os.getenv('OPENAI_API_KEY'))
     title, content = translator.generate_chinese_news_feed_post(
         tweet.display_name, tweet.raw_content)
-    Tweet.update_tweet(tweet_id, title=title, content=content)
     return jsonify({
         'message': 'Tweet rewritten successfully',
         'title': title,
