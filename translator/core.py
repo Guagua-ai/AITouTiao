@@ -38,7 +38,7 @@ class TranslatorCore(object):
         ''' Generate a Chinese news feed post '''
         response = openai.Completion.create(
             engine=self.config.translation_engine,
-            prompt=f"Image you are Chinese News Feed Reporter, write a Chinese news feed post (remove all urls and don't translate human names) for tweet from {author}: {text} Response must be a json with two fields. First field is title and second field is content.",
+            prompt=f"你现在是一个新闻记者, 写一篇中文博客关于{author}发布的一篇推文{text}.你给我的结果需要是一个json,里面有两个fields. 第一个field是title,第二个field是content.",
             max_tokens=self.config.translation_max_tokens,
             n=self.config.translation_n,
             stop=None,
@@ -52,7 +52,7 @@ class TranslatorCore(object):
     def generate_v2(self, author, text):
         ''' Generate a Chinese news feed post using GPT-4 chat model '''
         messages = [
-            {"role": "user", "content": f"Translate this tweet into a Chinese news feed post. The author is {author}, and the tweet text is {text}. Please remove all URLs, do not translate human names, and provide the response as a JSON object with two fields: 'title' and 'content'."}
+            {"role": "user", "content": f"你现在是一个新闻记者, 写一篇中文博客关于{author}发布的一篇推文{text}. 你给我的结果需要是一个json,里面有两个fields. 第一个field是title,第二个field是content."}
         ]
         tokens_required = self.config.translation_max_tokens
         self.rate_limiter.rate_limit(tokens_required)
