@@ -441,6 +441,9 @@ def rewrite():
     if not title or not content:
         return jsonify({'message': 'Failed to rewrite tweet'}), 500
     
+    # Update the tweet with the new content and title
+    Tweet.update_tweet(tweet_id, title=title, content=content)
+    
     return jsonify({
         'message': 'Tweet rewritten successfully',
         'title': title,
