@@ -161,13 +161,26 @@ def purify_tweets():
 @admin_required
 def get_all_tweets():
     """
-    Get all tweets.
+    Get all tweets with pagination support.
     """
+    # Get the page and per_page parameters from the request, set default values if not provided
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+
+    # Get all tweets
     tweets = Tweet.get_all_tweets()
 
+    # Calculate the start and end indices for pagination
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    # Slice the tweets array based on pagination
+    paginated_tweets = tweets[start:end]
+
+    # Prepare the response packet with the total results and paginated tweets
     response_packet = {
         "totalResults": len(tweets),
-        "articles": [tweet.to_int_dict(needs_content=True) for tweet in tweets]
+        "articles": [tweet.to_int_dict(needs_content=True) for tweet in paginated_tweets]
     }
 
     return jsonify(response_packet), 200
@@ -198,16 +211,16 @@ def create_tweet():
         return jsonify({'message': 'Missing required fields'}), 400
 
     tweet = Tweet.add_tweet(
-                source_id=source_id,
-                source_name=source_name,
-                author=author,
-                display_name=displayname,
-                title=title,
-                description=description,
-                url=url,
-                url_to_image=url_to_image,
-                content=content)
-    
+        source_id=source_id,
+        source_name=source_name,
+        author=author,
+        display_name=displayname,
+        title=title,
+        description=description,
+        url=url,
+        url_to_image=url_to_image,
+        content=content)
+
     if tweet.visibility == 'public':
         create_post_search_index().add_object(tweet.to_index_dict())
     return jsonify({'message': 'Tweet created successfully', 'tweet': tweet.to_dict()}), 201
@@ -256,8 +269,9 @@ def update_tweet(tweet_id):
         if tweet.visibility == "public":
             create_post_search_index().delete_object(tweet_id)
             create_post_search_index().save_object(tweet.to_index_dict())
-        
+
     return jsonify({'message': 'Tweet updated successfully', 'tweet': tweet.to_dict()}), 200
+
 
 @app.route('/admin/tweets/<int:tweet_id>/lgtm', methods=['PUT'])
 @admin_required
@@ -270,7 +284,7 @@ def approve_tweet(tweet_id):
         return jsonify({'message': 'Tweet not found'}), 404
     if tweet.visibility == 'public':
         return jsonify({'message': 'Tweet already approved'}), 400
-    
+
     if tweet.visibility != 'public':
         create_post_search_index().save_object(tweet.to_index_dict())
     tweet.approve()
@@ -330,12 +344,14 @@ def reindex_search():
     public_tweets = Tweet.get_all_tweets(visibility='public')
     tweet_index = create_post_search_index()
     tweet_index.clear_objects()
-    tweet_index.save_objects([tweet.to_index_dict() for tweet in public_tweets])
-    
+    tweet_index.save_objects([tweet.to_index_dict()
+                             for tweet in public_tweets])
+
     tweets = Tweet.get_all_tweets()
     internal_tweet_index = create_internal_post_search_index()
     internal_tweet_index.clear_objects()
-    internal_tweet_index.save_objects([tweet.to_index_dict() for tweet in tweets])
+    internal_tweet_index.save_objects(
+        [tweet.to_index_dict() for tweet in tweets])
 
     return jsonify({'message': 'Search reindexed successfully'}), 200
 
@@ -379,6 +395,7 @@ def search_posts():
 
     # Return the tweets as a JSON response
     return jsonify(tweets), 200
+
 
 @app.route('/admin/billing', methods=['GET'])
 @admin_required
