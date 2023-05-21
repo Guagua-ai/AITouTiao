@@ -103,10 +103,14 @@ class Puller(object):
                     author_name, author_username, profile_url = self.store_twitter_user_v2(
                         username, tweets_data, raw_tweet)
 
-                    # generate chinese news feed post
-                    title, content = self.translator.generate_chinese_news_feed_post(
-                        author_name,
-                        raw_tweet['text'])
+                    try:
+                        # generate chinese news feed post
+                        title, content = self.translator.generate_chinese_news_feed_post(
+                            author_name,
+                            raw_tweet['text'])
+                    except Exception as e:
+                        print(e)
+                        continue
                     if not title or not content:
                         continue
 
@@ -244,10 +248,15 @@ class Puller(object):
                     author_name, author_username, profile_url = self.store_twitter_user(
                         username, tweet, image_set)
 
-                    # generate chinese news feed post
-                    title, content = self.translator.generate_chinese_news_feed_post(
-                        tweet.user.displayname,
-                        tweet.rawContent)
+                    try:
+                        # generate chinese news feed post
+                        title, content = self.translator.generate_chinese_news_feed_post(
+                            tweet.user.displayname,
+                            tweet.rawContent)
+                    except Exception as e:
+                        print(e)
+                        continue
+                    
                     if not title or not content:
                         continue
 
