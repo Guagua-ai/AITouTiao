@@ -10,6 +10,14 @@ from models.view_history import ViewHistory
 from modules.utils import require_valid_user
 
 
+@app.route('/tweets/headliners', methods=['GET'])
+@jwt_required(optional=True)
+def get_headliners():
+    headliners = Tweet.get_headliners()
+    headliner_data = [headliner.to_dict() for headliner in headliners]
+    return jsonify(headliner_data), 200
+
+
 @app.route('/tweets', methods=['GET'])
 @jwt_required(optional=True)
 def tweets():

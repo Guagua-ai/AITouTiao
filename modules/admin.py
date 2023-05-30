@@ -1,5 +1,6 @@
 import os
 import requests
+import openai
 from app import app
 from flask import jsonify, request
 from billing.api import get_daily_usage
@@ -7,6 +8,7 @@ from billing.server import get_daily_aws_cost
 from db.storage import upload_image_to_s3
 from models.user import User
 from models.tweet import Tweet
+from models.headliner import Headliner
 from modules.utils import admin_required
 from search.index import create_post_search_index, create_user_search_index, create_internal_post_search_index
 from translator.core import TranslatorCore
@@ -449,3 +451,65 @@ def rewrite():
         'title': title,
         'content': content
     }), 200
+
+
+@app.route('/admin/headline', methods=['POST'])
+@admin_required
+def add_headline():
+    """
+    Add a headline to a tweet.
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'No data provided'}), 400
+
+    tweet_id = data.get('tweet_id')
+    if not tweet_id:
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    title = tweet.title
+    image_url = data.get('image_url')
+    if not all([tweet_id, title, image_url]):
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    tweet = Tweet.get_tweet_by_id(tweet_id)
+    if not tweet:
+        return jsonify({'message': 'Tweet not found'}), 404
+
+    prompt = f'Generate a headline image for a tweet with the title "{title}"'
+    generation_response = openai.Image.create(
+        prompt=prompt,
+        n=1,
+        size="1280x800",
+        response_format="url",
+    )
+
+    # Convert the image to bytes so it can be uploaded to S3
+    response = requests.get(generation_response)
+    if response.status_code != 200:
+        return jsonify({'message': 'Failed to generate image'}), 500
+    image_data = response.content
+
+    # Upload the image to S3
+    bucket_key = 'server-news-tweet-photo'
+    object_key = f'tweets/{tweet_id}-headline-image.jpg'
+    success = upload_image_to_s3(bucket_key, object_key, image_data)
+    if not success:
+        return jsonify({'message': 'Failed to upload image to S3'}), 500
+
+    # Get the URL of the S3 object
+    image_url = f'https://{bucket_key}.s3.amazonaws.com/{object_key}'
+
+    headliner = Headliner.add_headliner(tweet_id, title, image_url)
+
+    # Return the headliner as a JSON response
+    return jsonify(
+        {
+            'message': 'Headline added successfully',
+            'tweet': headliner.to_dict()
+        }
+    ), 200
