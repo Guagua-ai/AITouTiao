@@ -5,7 +5,7 @@ from app import app
 from flask import jsonify, request
 from billing.api import get_daily_usage
 from billing.server import get_daily_aws_cost
-from db.storage import upload_image_to_s3
+from db.storage import upload_image_to_s3, delete_headliner_image
 from models.user import User
 from models.tweet import Tweet
 from models.headliner import Headliner
@@ -533,3 +533,24 @@ def add_headline(tweet_id):
             'tweet': headliner.to_dict()
         }
     ), 200
+
+
+@app.route('/admin/headline/<int:tweet_id>', methods=['DELETE'])
+@admin_required
+def delete_headline(tweet_id):
+    """
+    Delete a headline by tweet ID.
+    """
+    if not tweet_id:
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    headliner = Headliner.get_headliner_by_tweet_id(tweet_id)
+    if not headliner:
+        return jsonify({'message': 'Headline not found'}), 404
+    
+    if headliner.image_url is not None:
+        # Delete the image from S3
+        delete_headliner_image(headliner.image_url)
+
+    Headliner.delete_headliner(headliner.id)
+    return jsonify({'message': 'Headline deleted successfully'}), 200

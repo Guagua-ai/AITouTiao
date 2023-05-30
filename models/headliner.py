@@ -58,6 +58,6 @@ class Headliner(db.Model):
         headliners = Headliner.query.all()
         return headliners
 
-    def get_headliners_by_tweet_id(tweet_id):
-        headliners = Headliner.query.filter_by(tweet_id=tweet_id).all()
-        return headliners
+    def get_headliner_by_tweet_id(tweet_id):
+        headliner = Headliner.query.filter_by(tweet_id=tweet_id).first()
+        return headliner

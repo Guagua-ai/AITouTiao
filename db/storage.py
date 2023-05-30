@@ -68,6 +68,15 @@ def download_image_from_s3(bucket_key, object_key):
     return response['Body'].read()
 
 
+def delete_headliner_image(image_url):
+    """
+    Deletes a headliner image from S3.
+    :param image_url: URL of the image
+    """
+    e = get_s3_client().delete_object(
+        Bucket='server-news-tweet-photo', Key=image_url.split('/')[-1])
+
+
 def delete_user_profile_image(image_url):
     """
     Deletes a user's profile image from S3.

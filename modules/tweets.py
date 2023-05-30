@@ -6,6 +6,7 @@ from models.collection import Collection
 from models.like import Like
 from models.tweet import Tweet
 from models.user import User
+from models.headliner import Headliner
 from models.view_history import ViewHistory
 from modules.utils import require_valid_user
 
@@ -13,7 +14,7 @@ from modules.utils import require_valid_user
 @app.route('/tweets/headliners', methods=['GET'])
 @jwt_required(optional=True)
 def get_headliners():
-    headliners = Tweet.get_headliners()
+    headliners = Headliner.get_headliners()
     headliner_data = [headliner.to_dict() for headliner in headliners]
     return jsonify(headliner_data), 200
 
