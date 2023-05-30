@@ -27,7 +27,7 @@ class Headliner(db.Model):
             'image_url': self.image_url,
         }
 
-    def add_headliner(self, tweet_id, title, image_url):
+    def add_headliner(tweet_id, title, image_url):
         headliner = Headliner(
             tweet_id=tweet_id,
             title=title,
@@ -37,27 +37,27 @@ class Headliner(db.Model):
         db.session.commit()
         return headliner
 
-    def delete_headliner(self, headliner_id):
+    def delete_headliner(headliner_id):
         headliner = Headliner.query.get(headliner_id)
         db.session.delete(headliner)
         db.session.commit()
         return headliner_id
 
-    def update_headliner(self, headliner_id, title, image_url):
+    def update_headliner(headliner_id, title, image_url):
         headliner = Headliner.query.get(headliner_id)
         headliner.title = title
         headliner.image_url = image_url
         db.session.commit()
         return headliner
 
-    def get_headliner(self, headliner_id):
+    def get_headliner(headliner_id):
         headliner = Headliner.query.get(headliner_id)
         return headliner
 
-    def get_headliners(self):
+    def get_headliners():
         headliners = Headliner.query.all()
         return headliners
 
-    def get_headliners_by_tweet_id(self, tweet_id):
+    def get_headliners_by_tweet_id(tweet_id):
         headliners = Headliner.query.filter_by(tweet_id=tweet_id).all()
         return headliners

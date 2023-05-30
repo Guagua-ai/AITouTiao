@@ -453,17 +453,12 @@ def rewrite():
     }), 200
 
 
-@app.route('/admin/headline', methods=['POST'])
+@app.route('/admin/headline/<int:tweet_id>', methods=['POST'])
 @admin_required
-def add_headline():
+def add_headline(tweet_id):
     """
-    Add a headline to a tweet.
+    Create a headline for a tweet.
     """
-    data = request.get_json()
-    if not data:
-        return jsonify({'message': 'No data provided'}), 400
-
-    tweet_id = data.get('tweet_id')
     if not tweet_id:
         return jsonify({'message': 'Missing required fields'}), 400
 
@@ -472,26 +467,51 @@ def add_headline():
         return jsonify({'message': 'Tweet not found'}), 404
 
     title = tweet.title
-    image_url = data.get('image_url')
-    if not all([tweet_id, title, image_url]):
-        return jsonify({'message': 'Missing required fields'}), 400
 
-    tweet = Tweet.get_tweet_by_id(tweet_id)
-    if not tweet:
-        return jsonify({'message': 'Tweet not found'}), 404
+    data = request.get_json()
+    if data.get('image_url') is not None:
+        image_url = data.get('image_url')
+        headliner = None
 
+        if 's3.amazonaws.com' not in image_url:
+            # Upload the image to S3
+            bucket_key = 'server-news-tweet-photo'
+            object_key = f'tweets/{tweet_id}-headline-image.jpg'
+            success = upload_image_to_s3(bucket_key, object_key, image_url)
+            if not success:
+                return jsonify({'message': 'Failed to upload image to S3'}), 500
+
+            # Get the URL of the S3 object
+            image_url = f'https://{bucket_key}.s3.amazonaws.com/{object_key}'
+
+        headliner = Headliner.add_headliner(tweet_id, title, image_url)
+        return jsonify(
+            {
+                'message': 'Headline added successfully',
+                'tweet': headliner.to_dict()
+            }
+        ), 200
+
+    # Generate a headline image using OpenAI's Image API
     prompt = f'Generate a headline image for a tweet with the title "{title}"'
     generation_response = openai.Image.create(
         prompt=prompt,
         n=1,
-        size="1280x800",
+        size="1024x1024",
         response_format="url",
     )
 
-    # Convert the image to bytes so it can be uploaded to S3
-    response = requests.get(generation_response)
-    if response.status_code != 200:
+    # Check if the response contains the necessary data
+    if not generation_response or 'data' not in generation_response or not generation_response['data']:
         return jsonify({'message': 'Failed to generate image'}), 500
+
+    # Extract the image URL from the response
+    image_url = generation_response['data'][0]['url']
+
+    # Get the image data from the URL
+    response = requests.get(image_url)
+    if response.status_code != 200:
+        return jsonify({'message': 'Failed to download generated image'}), 500
     image_data = response.content
 
     # Upload the image to S3
