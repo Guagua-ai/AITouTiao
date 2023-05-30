@@ -22,4 +22,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    pass
+    op.execute("UPDATE tweets SET num_likes = NULL WHERE num_likes = 0")

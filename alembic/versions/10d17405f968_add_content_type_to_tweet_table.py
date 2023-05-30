@@ -28,4 +28,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    pass
+    # drop the content_type column from the tweet table
+    op.drop_column('tweets', 'content_type')

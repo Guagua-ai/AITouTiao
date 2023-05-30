@@ -35,4 +35,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    pass
+    # Drop likes relationship
+    op.drop_index(op.f('ix_likes_user_id'), table_name='likes')
+    op.drop_index(op.f('ix_likes_tweet_id'), table_name='likes')
+    op.drop_column('collections', 'last_accesss_at')
+    op.drop_column('tweets', 'num_likes')
+    op.drop_table('likes')

@@ -21,4 +21,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    pass
+    op.create_unique_constraint('collections_name_key', 'collections', ['name'])

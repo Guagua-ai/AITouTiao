@@ -20,4 +20,4 @@ def upgrade() -> None:
     op.add_column('users', sa.Column('phone', sa.String(), nullable=True))
 
 def downgrade() -> None:
-    pass
+    op.drop_column('users', 'phone')
